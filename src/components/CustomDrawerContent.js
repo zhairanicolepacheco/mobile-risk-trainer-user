@@ -21,21 +21,17 @@ export default function CustomDrawerContent(props) {
         {
           text: "Sign Out",
           onPress: async () => {
-            // try {
-            //   await auth().signOut(); 
-            //   console.log("User signed out");
-            //   navigation.reset({
-            //     index: 0,
-            //     routes: [{ name: 'Login' }], 
-            //   });
-            // } catch (error) {
-            //   console.error("Error signing out: ", error);
-            //   Alert.alert("Error", "Failed to sign out. Please try again.");
-            // }
-            navigation.reset({
+            try {
+              await auth().signOut(); 
+              console.log("User signed out");
+              navigation.reset({
                 index: 0,
                 routes: [{ name: 'Login' }], 
               });
+            } catch (error) {
+              console.error("Error signing out: ", error);
+              Alert.alert("Error", "Failed to sign out. Please try again.");
+            }
           }
         }
       ]

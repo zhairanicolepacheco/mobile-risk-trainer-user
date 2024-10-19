@@ -7,26 +7,38 @@ import Tabs from './BottomTab';
 import ReportScreen from './ReportList';
 import AboutScreen from './AboutUs';
 import CustomDrawerContent from '../components/CustomDrawerContent';
-import ProfileScreen from './Profile';
+import UserProfile from './Profile';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  Register: undefined;
+  Login: undefined;
+  Drawer: { userId: string };
+};
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Drawer'>;
 
 const Drawer = createDrawerNavigator();
 
-export default function DrawerDashboard() {
+export default function DrawerDashboard({ route }: Props) {
   const colorScheme = useColorScheme();
   const tintColor = Colors[colorScheme ?? 'light'].tint;
+  const userId = route.params?.userId;
+
+  console.log('Logged in user ID:', userId);
 
   return (
     <Drawer.Navigator
       initialRouteName="Mobile Risk Trainer"
-      drawerContent={props => <CustomDrawerContent {...props} />}
+      drawerContent={props => <CustomDrawerContent {...props} userId={userId} />}
       screenOptions={{
         headerShown: true,
         drawerActiveTintColor: tintColor,
         drawerInactiveTintColor: Colors[colorScheme ?? 'light'].text,
       }}>
+        
       <Drawer.Screen
         name="Mobile Risk Trainer"
-        component={Tabs}
         options={{
           title: 'Mobile Risk Trainer',
           drawerIcon: ({color, size, focused}) => (
@@ -37,10 +49,12 @@ export default function DrawerDashboard() {
             />
           ),
         }}
-      />
+      >
+        {(props) => <Tabs {...props} userId={userId} />}
+      </Drawer.Screen>
+
       <Drawer.Screen
         name="User Profile"
-        component={ProfileScreen}
         options={{
           title: 'User Profile',
           drawerIcon: ({color, size, focused}) => (
@@ -51,10 +65,13 @@ export default function DrawerDashboard() {
             />
           ),
         }}
-      />
+      >
+        {(props) => <UserProfile {...props} userId={userId} />}
+      </Drawer.Screen>
+
       <Drawer.Screen
         name="Reported Numbers"
-        component={ReportScreen}
+        initialParams={{ userId }}
         options={{
           title: 'Reported Numbers',
           drawerIcon: ({color, size, focused}) => (
@@ -65,10 +82,14 @@ export default function DrawerDashboard() {
             />
           ),
         }}
-      />
+      >
+        {(props) => <ReportScreen {...props} userId={userId} />}
+      </Drawer.Screen>
+
       <Drawer.Screen
         name="About Us"
         component={AboutScreen}
+        initialParams={{ userId }}
         options={{
           title: 'About Us',
           drawerIcon: ({color, size, focused}) => (

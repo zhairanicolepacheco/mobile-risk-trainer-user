@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "659417804507",
+    "project_id": "thesis-d6ac1",
+    "storage_bucket": "thesis-d6ac1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659417804507:android:a8615af8ed073c73bc26fe",
+        "android_client_info": {
+          "package_name": "com.mrtproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzMxfhxkbd4o0LEeMzNTdOgPWJsKsuSRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

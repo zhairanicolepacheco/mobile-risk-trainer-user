@@ -5,7 +5,6 @@ import Animated from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-// Define the types for the navigation
 type RootStackParamList = {
   Smishing: undefined;
   Content: undefined;
@@ -21,7 +20,6 @@ export default function Smishing({ navigation }: Props) {
   const [collapsedSample, setCollapsedSample] = useState(true);
   const [collapsedReference, setCollapsedReference] = useState(true);
 
-  // Toggle function for each section
   const toggleSmishing = () => setCollapsedSmishing(!collapsedSmishing);
   const toggleCause = () => setCollapsedCause(!collapsedCause);
   const toggleEffect = () => setCollapsedEffect(!collapsedEffect);
@@ -228,7 +226,7 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: 'bold',
-    fontSize: 16, // Added font size for bold text
+    fontSize: 16,
   },
   button: {
     height: 50,
@@ -245,7 +243,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16, // Increased from 14
+    fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -258,8 +256,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     marginBottom: 10,
   },
-  // New styles for regular text
   regularText: {
-    fontSize: 16, // Added font size for regular text
+    fontSize: 16,
   },
 });

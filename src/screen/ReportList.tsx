@@ -1,30 +1,51 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   ScrollView,
   StyleSheet,
   TextInput,
   View,
-  Alert
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { Cell, Section, TableView } from 'react-native-tableview-simple';
+import firestore from '@react-native-firebase/firestore';
 
-// Generate 50 mock blocked contacts
-const generateMockData = () => {
-  const data = [];
-  for (let i = 0; i < 50; i++) {
-    data.push({
-      id: i.toString(),
-      name: `Contact ${i + 1}`,
-      phone: `+63 9${Math.floor(100000000 + Math.random() * 900000000)}`,
-      reason: ['Spam', 'Harassment', 'Unknown'][Math.floor(Math.random() * 3)]
-    });
-  }
-  return data;
+type Contact = {
+  id: string;
+  name: string;
+  phone: string;
+  reason: string;
 };
 
-export default function ReportList() {
-  const [contacts, setContacts] = useState(generateMockData());
+type ReportListProps = {
+  userId: string;
+};
+
+export default function ReportList({ userId }: ReportListProps) {
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContacts = async () => {
+      try {
+        const contactsRef = firestore().collection('users').doc(userId).collection('blockedContacts');
+        const snapshot = await contactsRef.get();
+        const fetchedContacts = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as Contact));
+        setContacts(fetchedContacts);
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+        Alert.alert('Error', 'Failed to load contacts. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContacts();
+  }, [userId]);
 
   const filteredContacts = useMemo(() => {
     return contacts.filter(contact => 
@@ -33,16 +54,40 @@ export default function ReportList() {
     );
   }, [contacts, searchQuery]);
 
-  const removeContact = (id: string) => {
+  const removeContact = async (id: string) => {
     Alert.alert(
       "Remove Contact",
       "Are you sure you want to unblock this contact?",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "OK", onPress: () => setContacts(contacts.filter(c => c.id !== id)) }
+        { 
+          text: "OK", 
+          onPress: async () => {
+            try {
+              await firestore()
+                .collection('users')
+                .doc(userId)
+                .collection('blockedContacts')
+                .doc(id)
+                .delete();
+              setContacts(contacts.filter(c => c.id !== id));
+            } catch (error) {
+              console.error('Error removing contact:', error);
+              Alert.alert('Error', 'Failed to remove contact. Please try again.');
+            }
+          }
+        }
       ]
     );
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#22C55E" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.stage}>
@@ -88,5 +133,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingLeft: 10,
     backgroundColor: 'white',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#EFEFF4',
   },
 });

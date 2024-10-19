@@ -22,6 +22,7 @@
     "@react-navigation/stack": "^6.4.1",
     "@types/react-native-linear-gradient": "^2.3.1",
     "@types/react-navigation": "^3.0.8",
+    "date-fns": "^4.1.0",
     "react": "18.3.1",
     "react-native": "0.75.4",
     "react-native-circular-progress": "^1.4.0",
