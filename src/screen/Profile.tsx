@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
+import firestore from '@react-native-firebase/firestore';
 
 const defaultProfileSvg = `
 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -11,11 +12,53 @@ const defaultProfileSvg = `
 </svg>
 `;
 
-export default function UserProfile({ 
-  username = "JohnDoe",
-  phoneNumber = "+1 (555) 123-4567",
-  email = "johndoe@example.com"
-}) {
+type UserProfileProps = {
+  userId: string;
+};
+
+export default function UserProfile({ userId }: UserProfileProps) {
+  const [userData, setUserData] = useState<{
+    username: string;
+    phoneNumber: string;
+    email: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDoc = await firestore().collection('users').doc(userId).get();
+        if (userDoc.exists) {
+          setUserData(userDoc.data() as { username: string; phoneNumber: string; email: string });
+        } else {
+          console.log('No such user!');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#22C55E" />
+      </View>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Failed to load user data</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -23,27 +66,19 @@ export default function UserProfile({
           <View style={styles.avatarContainer}>
             <SvgXml xml={defaultProfileSvg} width={120} height={120} />
           </View>
-          <Text style={styles.username}>{username}</Text>
+          <Text style={styles.username}>{userData.username}</Text>
         </View>
         <View style={styles.infoContainer}>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Phone</Text>
-            <Text style={styles.infoValue}>{phoneNumber}</Text>
+            <Text style={styles.infoValue}>{userData.phoneNumber}</Text>
           </View>
           <View style={styles.separator} />
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoValue}>{email}</Text>
+            <Text style={styles.infoValue}>{userData.email}</Text>
           </View>
         </View>
-        {/* <View style={styles.actionsContainer}>
-          <View style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Edit Profile</Text>
-          </View>
-          <View style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Settings</Text>
-          </View>
-        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -52,7 +87,7 @@ export default function UserProfile({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0FFF4', // bg-green-50
+    backgroundColor: '#F0FFF4',
   },
   scrollContent: {
     flexGrow: 1,
@@ -60,7 +95,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#22C55E', // bg-green-500
+    backgroundColor: '#22C55E',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
@@ -96,7 +131,7 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#15803D', // text-green-700
+    color: '#15803D',
     marginBottom: 4,
   },
   infoValue: {
@@ -105,29 +140,24 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 1,
-    backgroundColor: '#E5E7EB', // bg-gray-200
+    backgroundColor: '#E5E7EB',
     marginVertical: 16,
   },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginBottom: 20,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0FFF4',
   },
-  actionButton: {
-    backgroundColor: '#22C55E', // bg-green-500
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0FFF4',
   },
-  actionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
+  errorText: {
+    fontSize: 18,
+    color: '#DC2626',
+    textAlign: 'center',
   },
 });

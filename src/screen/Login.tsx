@@ -20,47 +20,51 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 type RootStackParamList = {
   Register: undefined;
   Login: undefined;
-  Drawer: undefined;
-  //Profile: { userId: string }; // Profile expects a userId as a parameter
+  Drawer: { userId: string };
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-export default function Login({ navigation }: Props) {
+export default function Component({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    // console.log("Login attempt with email:", email);
-    // try {
-    //   // Sign in with email and password
-    //   const userCredential = await auth().signInWithEmailAndPassword(email, password);
-    //   const user = userCredential.user;
-
-    //   // Check if user exists in Firestore
-    //   const userDocument = await firestore()
-    //     .collection("users")
-    //     .doc(user.uid)
-    //     .get();
-
-    //   if (userDocument.exists) {
-    //     console.log("User found in Firestore, navigating to tabs.");
-    //     navigation.navigate('Drawer'); // Navigate to the tabs
-    //   } else {
-    //     Alert.alert("User not found", "No user found in our records. Please register.");
-    //   }
-    // } catch (error) {
-    //   if (error instanceof Error) {
-    //     console.log("Login error:", error);
-    //     Alert.alert("Login failed", error.message);
-    //   } else {
-    //     console.log("An unknown error occurred");
-    //     Alert.alert("Login failed", "An unexpected error occurred. Please try again.");
-    //   }
-    // }
-    navigation.navigate('Drawer'); // Navigate to the tabs
-
+    console.log("Login attempt with email:", email);
+    try {
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+  
+      const userDocument = await firestore()
+        .collection("users")
+        .doc(user.uid)
+        .get();
+  
+      if (userDocument.exists) {
+        const userData = userDocument.data();
+        if (userData && userData.role === 'client') {
+          console.log("User is a client, navigating to drawer.");
+          navigation.navigate('Drawer', { userId: user.uid });
+        } else {
+          console.log("User is not a client. Role:", userData?.role);
+          Alert.alert("Access Denied", "Only clients are allowed to log in.");
+          await auth().signOut();
+        }
+      } else {
+        console.log("User not found in Firestore.");
+        Alert.alert("User not found", "No user found in our records. Please register.");
+        await auth().signOut();
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log("Login error:", error);
+        Alert.alert("Login failed", error.message);
+      } else {
+        console.log("An unknown error occurred");
+        Alert.alert("Login failed", "An unexpected error occurred. Please try again.");
+      }
+    }
   };
 
   const togglePasswordVisibility = () => {
@@ -68,7 +72,7 @@ export default function Login({ navigation }: Props) {
   };
 
   const handleRegister = () => {
-    navigation.navigate('Register'); // Navigate to the Register screen
+    navigation.navigate('Register'); 
   };
 
   return (

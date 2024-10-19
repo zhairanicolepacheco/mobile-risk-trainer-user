@@ -15,7 +15,6 @@ import {
 import RNContacts from 'react-native-contacts';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
-// Define types for react-native-contacts
 interface Contact {
   recordID: string;
   givenName: string;

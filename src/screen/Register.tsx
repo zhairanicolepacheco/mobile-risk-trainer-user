@@ -21,8 +21,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 type RootStackParamList = {
   Register: undefined;
   Login: undefined;
-  Drawer: undefined;
-  //Profile: { userId: string }; // Profile expects a userId as a parameter
+  Drawer: { userId: string };
 };
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
@@ -35,42 +34,126 @@ export default function Register({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRegister = async () => {
+  const validateInputs = () => {
+    if (!username || !phoneNumber || !email || !password || !confirmPassword) {
+      showError("Error", "All fields are required");
+      return false;
+    }
+
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      showError("Error", "Passwords do not match");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      showError("Error", "Please enter a valid email address");
+      return false;
+    }
+
+    const phoneRegex = /^\+?[0-9]{10,14}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      showError("Error", "Please enter a valid phone number");
+      return false;
+    }
+
+    if (password.length < 6) {
+      showError("Error", "Password must be at least 6 characters long");
+      return false;
+    }
+
+    return true;
+  };
+
+  const checkUserExists = async () => {
+    try {
+      const emailExists = await auth().fetchSignInMethodsForEmail(email);
+      if (emailExists.length > 0) {
+        showError("Error", "An account with this email already exists");
+        return true;
+      }
+
+      const db = firestore();
+      const batch = db.batch();
+      const usernameRef = db.collection('users').where('username', '==', username).limit(1);
+      const phoneRef = db.collection('users').where('phoneNumber', '==', phoneNumber).limit(1);
+
+      const [usernameSnapshot, phoneSnapshot] = await Promise.all([
+        usernameRef.get(),
+        phoneRef.get()
+      ]);
+
+      if (!usernameSnapshot.empty) {
+        showError("Error", "This username is already taken");
+        return true;
+      }
+
+      if (!phoneSnapshot.empty) {
+        showError("Error", "An account with this phone number already exists");
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error checking user existence:", error);
+      showError("Error", "An error occurred while checking user information. Please try again.");
+      return true;
+    }
+  };
+
+  const showError = (title: string, message: string) => {
+    Alert.alert(title, message);
+  };
+
+  const handleRegister = async () => {
+    if (!validateInputs()) {
       return;
     }
 
-    if (!username || !phoneNumber || !email || !password) {
-      Alert.alert("Error", "All fields are required");
-      return;
+    try {
+      const userExists = await checkUserExists();
+      if (userExists) {
+        return;
+      }
+
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+
+      await firestore().collection('users').doc(user.uid).set({
+        username: username,
+        phoneNumber: phoneNumber,
+        email: user.email,
+        role: 'client',
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+      showError("Success", "Account created successfully");
+      navigation.navigate('Login');
+    } catch (error) {
+      console.log("Registration error:", error);
+      
+      if (error instanceof Error && 'code' in error) {
+        const firebaseError = error as { code: string; message: string };
+        switch (firebaseError.code) {
+          case 'auth/email-already-in-use':
+            showError("Error", "That email address is already in use!");
+            break;
+          case 'auth/invalid-email':
+            showError("Error", "That email address is invalid!");
+            break;
+          case 'auth/weak-password':
+            showError("Error", "The password is too weak.");
+            break;
+          default:
+            showError("Error", firebaseError.message);
+        }
+      } else if (error instanceof Error) {
+        showError("Error", error.message);
+      } else {
+        console.log("An unknown error occurred");
+        showError("Error", "An unexpected error occurred. Please try again.");
+      }
     }
-
-    // try {
-    //   const userCredential = await auth().createUserWithEmailAndPassword(email, password);
-    //   const user = userCredential.user;
-
-    //   await firestore().collection('users').doc(user.uid).set({
-    //     username: username,
-    //     phoneNumber: phoneNumber,
-    //     email: user.email,
-    //     role: 'client',
-    //     createdAt: firestore.FieldValue.serverTimestamp(),
-    //   });
-
-    //   Alert.alert("Success", "Account created successfully");
-    //   navigation.navigate('Login');
-    // } catch (error) {
-    //   if (error instanceof Error) {
-    //     console.log("Registration error:", error);
-    //     Alert.alert("Registration failed", error.message);
-    //   } else {
-    //     console.log("An unknown error occurred");
-    //     Alert.alert("Registration failed", "An unexpected error occurred. Please try again.");
-    //   }
-    // }
-    
-    navigation.navigate('Login');
   };
 
   const togglePasswordVisibility = (field: string) => {
@@ -108,6 +191,7 @@ export default function Register({ navigation }: Props) {
                 value={username}
                 onChangeText={setUsername}
                 placeholderTextColor="#888"
+                accessibilityLabel="Username input"
               />
             </View>
 
@@ -120,6 +204,7 @@ export default function Register({ navigation }: Props) {
                 onChangeText={setPhoneNumber}
                 keyboardType="phone-pad"
                 placeholderTextColor="#888"
+                accessibilityLabel="Phone number input"
               />
             </View>
 
@@ -132,6 +217,7 @@ export default function Register({ navigation }: Props) {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 placeholderTextColor="#888"
+                accessibilityLabel="Email input"
               />
             </View>
 
@@ -144,6 +230,7 @@ export default function Register({ navigation }: Props) {
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
                 placeholderTextColor="#888"
+                accessibilityLabel="Password input"
               />
               <TouchableOpacity onPress={() => togglePasswordVisibility('password')} style={styles.icon}>
                 <Icon name={showPassword ? "eye-slash" : "eye"} size={20} color="#888" />
@@ -159,6 +246,7 @@ export default function Register({ navigation }: Props) {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
                 placeholderTextColor="#888"
+                accessibilityLabel="Confirm password input"
               />
               <TouchableOpacity onPress={() => togglePasswordVisibility('confirm')} style={styles.icon}>
                 <Icon name={showConfirmPassword ? "eye-slash" : "eye"} size={20} color="#888" />

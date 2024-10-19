@@ -6,7 +6,6 @@ import * as Progress from 'react-native-progress';
 import Smishing from './Smishing';
 import { HelloWave } from '../components/HelloWave';
 
-// Define the types for the navigation
 type RootStackParamList = {
   Content: undefined;
   Smishing: undefined;
