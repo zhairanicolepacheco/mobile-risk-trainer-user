@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import { useColorScheme } from '../hooks/useColorScheme';
 import HomeScreen from './Home';
@@ -25,32 +25,32 @@ export default function BottomTab({ userId }: BottomTabProps) {
 
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size, focused }) => {
-          let iconName: string;
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home';
-          } else if (route.name === 'Messages') {
-            iconName = focused ? 'comments' : 'comments-o';
-          } else if (route.name === 'Contacts') {
-            iconName = focused ? 'address-book' : 'address-book-o';
-          } else {
-            iconName = focused ? 'help-circle' : 'help-circle-outline';
-          }
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: tintColor,
-        tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].text,
-        headerShown: false,
-      })}
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ color, size, focused }) => {
+        let iconName: keyof typeof Ionicons.glyphMap; // Enforce valid Ionicons name types
+  
+        if (route.name === 'Home') {
+          iconName = focused ? 'home' : 'home-outline';
+        } else if (route.name === 'Messages') {
+          iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
+        } else if (route.name === 'Contacts') {
+          iconName = focused ? 'call' : 'call-outline';
+        }
+  
+        return <Ionicons name={iconName} size={size} color={color} />;
+      },
+      tabBarActiveTintColor: tintColor, // Set the active color to green
+      tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].text, // Set inactive color
+    })}
     >
       <Tab.Screen 
         name="Home" 
         component={HomeScreen} 
         initialParams={{ userId }}
+        options={{ headerShown: false }} // If you want to show the header only for Home
       />
-      <Tab.Screen name="Messages" component={SMSScreen} />
-      <Tab.Screen name="Contacts" component={ContactsScreen} />
+      <Tab.Screen name="Messages" component={SMSScreen}  options={{ headerShown: false }}/>
+      <Tab.Screen name="Contacts" component={ContactsScreen}  options={{ headerShown: false }}/>
     </Tab.Navigator>
   );
 }

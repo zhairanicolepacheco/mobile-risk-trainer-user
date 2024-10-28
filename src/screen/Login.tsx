@@ -10,7 +10,7 @@ import {
   Alert,
   TouchableOpacity
 } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { Ionicons } from '@expo/vector-icons';
 import LinearGradient from 'react-native-linear-gradient';
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
@@ -32,6 +32,10 @@ export default function Component({ navigation }: Props) {
 
   const handleLogin = async () => {
     console.log("Login attempt with email:", email);
+    if (!email.includes('@')) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
       const user = userCredential.user;
@@ -78,7 +82,7 @@ export default function Component({ navigation }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <LinearGradient
-        colors={['#00712D', '#6EC207']}
+        colors={['#006769', '#40A578']}
         style={styles.container}
       >
         <View style={styles.content}>
@@ -91,11 +95,11 @@ export default function Component({ navigation }: Props) {
           <Text style={styles.tagline}>A Mobile App for Smishing Attack Awareness</Text>
 
           <Text style={styles.header}>LOGIN</Text>
-          <Text style={styles.subheader}>Please log in to continue.</Text>
+          {/* <Text style={styles.subheader}>Please log in to continue.</Text> */}
 
           <View style={styles.inputContainer}>
-            <Icon name="envelope-o" size={20} color="#888" style={styles.icon} />
-            <TextInput
+          <Ionicons name="mail-outline" size={20} color="#888" style={styles.icon} />
+          <TextInput
               style={styles.input}
               placeholder="Email"
               value={email}
@@ -106,8 +110,8 @@ export default function Component({ navigation }: Props) {
           </View>
 
           <View style={styles.inputContainer}>
-            <Icon name="lock" size={20} color="#888" style={styles.icon} />
-            <TextInput
+          <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.icon} />
+          <TextInput
               style={styles.input}
               placeholder="Password"
               value={password}
@@ -116,7 +120,7 @@ export default function Component({ navigation }: Props) {
               placeholderTextColor="#888"
             />
             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.icon}>
-              <Icon name={showPassword ? "eye-slash" : "eye"} size={20} color="#888" />
+            <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#888"/>
             </TouchableOpacity>
           </View>
 

@@ -67,7 +67,7 @@ export default function AboutScreen() {
         {renderSection(
           "privacyPolicy",
           "Privacy Policy",
-          "This Privacy Policy describes how Mobile Risk Trainer collects, uses, and discloses your personal information when you use our services or otherwise communicate with us.  For purposes of this Privacy Policy, 'you' and 'your' means you as the user of the Services whose information we have collected pursuant to this Privacy Policy. Please read this Privacy Policy carefully. By using and accessing any of the Services, you agree to the collection, use, and disclosure of your information as described in this Privacy Policy. If you do not agree to this Privacy Policy, please do not use or access any of the Services."
+          "This Privacy Policy describes how Mobile Risk Trainer collects, uses, and discloses your personal information when you use our services or otherwise communicate with us."
         )}
         {renderSection(
           "contactUs",
