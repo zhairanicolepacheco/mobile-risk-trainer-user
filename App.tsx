@@ -47,7 +47,6 @@ export default function App() {
 
     const requestPermissions = async () => {
         if (Platform.OS !== 'android') {
-            console.log('Permissions are only requested on Android for this example');
             setPermissionsGranted(true);
             setLoading(false);
             return;
@@ -66,10 +65,8 @@ export default function App() {
 
             if (allGranted) {
                 setPermissionsGranted(true);
-                console.log('All permissions granted');
             } else {
                 Alert.alert('Permission required', 'We need access to your contacts and SMS to continue.');
-                console.log('Some permissions were denied');
             }
         } catch (error) {
             console.error('Error requesting permissions: ', error);

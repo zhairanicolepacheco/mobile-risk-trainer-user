@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import RNContacts from 'react-native-contacts';
-import FeatherIcon from 'react-native-vector-icons/Feather';
+import { Ionicons } from '@expo/vector-icons';
 
 interface Contact {
   recordID: string;
@@ -116,7 +116,7 @@ export default function ContactsList() {
         </View>
 
         <View style={styles.cardAction}>
-          <FeatherIcon color="#9ca3af" name="chevron-right" size={22} />
+          <Ionicons color="#9ca3af" name="chevron-forward" size={22} />
         </View>
       </View>
     </TouchableOpacity>

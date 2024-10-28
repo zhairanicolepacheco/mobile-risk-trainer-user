@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Image } from 'react-native';
 import Collapsible from 'react-native-collapsible';
 import Animated from 'react-native-reanimated';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import LinearGradient from 'react-native-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 type RootStackParamList = {
   Smishing: undefined;
@@ -28,18 +29,22 @@ export default function Smishing({ navigation }: Props) {
   const toggleReference = () => setCollapsedReference(!collapsedReference);
 
   return (
-    <ScrollView style={styles.container}>
+    <LinearGradient
+    colors={['#006769', '#40A578'] as [string, string]}
+    style={styles.container}
+    >
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
       {/* Header Image */}
-      <Animated.Image
+      <Image
         source={require('../assets/smishing2.png')}
         style={styles.image}
-        sharedTransitionTag="tag"
+        // sharedTransitionTag="tag"
       />
 
       {/* Smishing Section */}
       <TouchableOpacity onPress={toggleSmishing} style={styles.sectionHeader}>
         <Text style={styles.headerText}>What is Smishing?</Text>
-        <Icon name={collapsedSmishing ? 'chevron-down' : 'chevron-up'} size={20} color="#059212" />
+        <Ionicons name={collapsedSmishing ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedSmishing}>
         <View style={styles.sectionContent}>
@@ -52,7 +57,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Cause Section */}
       <TouchableOpacity onPress={toggleCause} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Causes of Smishing</Text>
-        <Icon name={collapsedCause ? 'chevron-down' : 'chevron-up'} size={20} color="#059212" />
+        <Ionicons name={collapsedCause ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedCause}>
         <View style={styles.sectionContent}>
@@ -73,7 +78,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Effect Section */}
       <TouchableOpacity onPress={toggleEffect} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Effects of Smishing</Text>
-        <Icon name={collapsedEffect ? 'chevron-down' : 'chevron-up'} size={20} color="#059212" />
+        <Ionicons name={collapsedEffect ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedEffect}>
         <View style={styles.sectionContent}>
@@ -87,14 +92,14 @@ export default function Smishing({ navigation }: Props) {
           <Text>Victims may give up login info, allowing attackers to take over accounts and access sensitive information.</Text>
 
           <Text style={styles.bold}>4. Malware on Phones:</Text>
-          <Text>Some smishing texts contain links that download malware onto the victim’s phone, potentially stealing passwords and personal data.</Text>
+          <Text>Some smishing texts contain links that down-outlineload malware onto the victim’s phone, potentially stealing passwords and personal data.</Text>
         </View>
       </Collapsible>
 
       {/* Types Section */}
       <TouchableOpacity onPress={toggleTypes} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Types of Smishing Attacks</Text>
-        <Icon name={collapsedTypes ? 'chevron-down' : 'chevron-up'} size={20} color="#059212" />
+        <Ionicons name={collapsedTypes ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedTypes}>
         <View style={styles.sectionContent}>
@@ -104,36 +109,36 @@ export default function Smishing({ navigation }: Props) {
           <Text style={styles.bold}>- Bank Fraud Alerts</Text>
           <Text style={styles.bold}>- Tax Scams</Text>
           <Text style={styles.bold}>- Service Cancellation</Text>
-          <Text style={styles.bold}>- Malicious App Downloads</Text>
+          <Text style={styles.bold}>- Malicious App down-outlineloads</Text>
         </View>
       </Collapsible>
 
       {/* Sample Section */}
       <TouchableOpacity onPress={toggleSample} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Examples</Text>
-        <Icon name={collapsedSample ? 'chevron-down' : 'chevron-up'} size={20} color="#059212" />
+        <Ionicons name={collapsedSample ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedSample}>
         <View style={styles.sectionContent}>
-          <Animated.Image
+          <Image
             source={require('../assets/sample1.jpg')}
             style={styles.image}
             // sharedTransitionTag="tag1"
           />
 
-        <Animated.Image
+        <Image
           source={require('../assets/sample2.jpg')}
           style={styles.image}
           // sharedTransitionTag="tag2"
         />
 
-        <Animated.Image
+        <Image
           source={require('../assets/sample3.jpg')}
           style={styles.image}
           // sharedTransitionTag="tag3"
         />
 
-        <Animated.Image
+        <Image
           source={require('../assets/sample4.jpg')}
           style={styles.image}
           // sharedTransitionTag="tag4"
@@ -144,7 +149,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Reference Section */}
       <TouchableOpacity onPress={toggleReference} style={styles.sectionHeader}>
         <Text style={styles.headerText}>References</Text>
-        <Icon name={collapsedReference ? 'chevron-down' : 'chevron-up'} size={20} color="#059212" />
+        <Ionicons name={collapsedReference ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedReference}>
         <View style={styles.sectionContent}>
@@ -156,7 +161,7 @@ export default function Smishing({ navigation }: Props) {
           </Text>
           <Text
             style={styles.reference}
-            onPress={() => Linking.openURL('https://web.archive.org/web/20220309084752/https:/www.ijcit.com/index.php/ijcit/article/download/201/55')}
+            onPress={() => Linking.openURL('https://web.archive.org/web/20220309084752/https:/www.ijcit.com/index.php/ijcit/article/down-outlineload/201/55')}
           >
             Njuguna, D., Kamau, J., & Kaburu, D. (2022). A Review of Smishing Attacks Mitigation Strategies.
           </Text>
@@ -188,6 +193,7 @@ export default function Smishing({ navigation }: Props) {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 }
 
@@ -196,6 +202,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f1f1f1',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   image: {
     width: '100%',
@@ -231,7 +241,7 @@ const styles = StyleSheet.create({
   button: {
     height: 50,
     width: '100%',
-    backgroundColor: '#059212',
+    backgroundColor: '#fff',
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
@@ -242,7 +252,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
+    color: '#059212',
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',

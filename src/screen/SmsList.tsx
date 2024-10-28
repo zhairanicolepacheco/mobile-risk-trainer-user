@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
 import SmsAndroid from 'react-native-get-sms-android';
 import { format } from 'date-fns';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Ionicons } from '@expo/vector-icons';
 
 interface SMS {
   _id: string;
@@ -89,7 +89,7 @@ export default function SmsList() {
             <Text style={styles.senderName}>{item.sender}</Text>
             <Text style={styles.messageCount}>{item.messages.length} messages</Text>
           </View>
-          <Icon name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color="#666" />
+          <Ionicons name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'} size={24} color="#666" />
         </TouchableOpacity>
         {isExpanded ? (
           item.messages.map((message) => renderSMS({ item: message }))

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Alert, StyleSheet } from 'react-native';
 import { DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../src/constants/Colors';
 import { useColorScheme } from '../../src/hooks/useColorScheme';
 import auth from '@react-native-firebase/auth';
@@ -26,8 +26,8 @@ export default function CustomDrawerContent(props) {
               console.log("User signed out");
               navigation.reset({
                 index: 0,
-                routes: [{ name: 'Login' }], 
-              });
+                routes: [{ name: 'Login' }],
+              });              
             } catch (error) {
               console.error("Error signing out: ", error);
               Alert.alert("Error", "Failed to sign out. Please try again.");
@@ -47,7 +47,7 @@ export default function CustomDrawerContent(props) {
       <DrawerItem
         label="Sign Out"
         onPress={handleSignOut}
-        icon={({ color, size }) => <Icon name="sign-out" color={color} size={size} />}
+        icon={({ color, size }) => <Ionicons name="log-out-outline" color={color} size={size} />}
         labelStyle={styles.signOutLabel}
       />
     </DrawerContentScrollView>

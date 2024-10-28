@@ -7,9 +7,47 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:659417804507:android:a8615af8ed073c73bc26fe",
+        "mobilesdk_app_id": "1:659417804507:android:76d74879068d5dc5bc26fe",
         "android_client_info": {
-          "package_name": "com.mrtproject"
+          "package_name": "com.admin_aira.MrtAdmin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzMxfhxkbd4o0LEeMzNTdOgPWJsKsuSRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659417804507:android:dc8d584e741dbac7bc26fe",
+        "android_client_info": {
+          "package_name": "com.mrtuser"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzMxfhxkbd4o0LEeMzNTdOgPWJsKsuSRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659417804507:android:946ebc4c8e194c8fbc26fe",
+        "android_client_info": {
+          "package_name": "com.thesis"
         }
       },
       "oauth_client": [],

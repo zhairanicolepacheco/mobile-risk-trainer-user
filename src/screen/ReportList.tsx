@@ -5,81 +5,54 @@ import {
   TextInput,
   View,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Text
 } from 'react-native';
-import { Cell, Section, TableView } from 'react-native-tableview-simple';
 import firestore from '@react-native-firebase/firestore';
+import { Ionicons } from '@expo/vector-icons';
 
-type Contact = {
+type ReportedContact = {
   id: string;
-  name: string;
-  phone: string;
+  number: string;
   reason: string;
 };
 
-type ReportListProps = {
+type ReportedContactsListProps = {
   userId: string;
 };
 
-export default function ReportList({ userId }: ReportListProps) {
-  const [contacts, setContacts] = useState<Contact[]>([]);
+export default function ReportedContactsList({ userId }: ReportedContactsListProps) {
+  const [reportedContacts, setReportedContacts] = useState<ReportedContact[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchContacts = async () => {
+    const fetchReportedContacts = async () => {
       try {
-        const contactsRef = firestore().collection('users').doc(userId).collection('blockedContacts');
-        const snapshot = await contactsRef.get();
+        const reportedContactsRef = firestore().collection('users').doc(userId).collection('reportedContacts');
+        const snapshot = await reportedContactsRef.get();
         const fetchedContacts = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        } as Contact));
-        setContacts(fetchedContacts);
+        } as ReportedContact));
+        setReportedContacts(fetchedContacts);
       } catch (error) {
-        console.error('Error fetching contacts:', error);
-        Alert.alert('Error', 'Failed to load contacts. Please try again.');
+        console.error('Error fetching reported contacts:', error);
+        Alert.alert('Error', 'Failed to load reported contacts. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchContacts();
+    fetchReportedContacts();
   }, [userId]);
 
   const filteredContacts = useMemo(() => {
-    return contacts.filter(contact => 
-      contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.phone.includes(searchQuery)
+    return reportedContacts.filter(contact => 
+      contact.number.includes(searchQuery) ||
+      contact.reason.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [contacts, searchQuery]);
-
-  const removeContact = async (id: string) => {
-    Alert.alert(
-      "Remove Contact",
-      "Are you sure you want to unblock this contact?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "OK", 
-          onPress: async () => {
-            try {
-              await firestore()
-                .collection('users')
-                .doc(userId)
-                .collection('blockedContacts')
-                .doc(id)
-                .delete();
-              setContacts(contacts.filter(c => c.id !== id));
-            } catch (error) {
-              console.error('Error removing contact:', error);
-              Alert.alert('Error', 'Failed to remove contact. Please try again.');
-            }
-          }
-        }
-      ]
-    );
-  };
+  }, [reportedContacts, searchQuery]);
 
   if (loading) {
     return (
@@ -90,54 +63,98 @@ export default function ReportList({ userId }: ReportListProps) {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.stage}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.searchContainer}>
+        
         <TextInput
           style={styles.searchInput}
-          placeholder="Search contacts..."
+          placeholder="Search reported contacts..."
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
+        <Ionicons name="search" size={20} color="gray" style={styles.searchIcon} />
       </View>
-      <TableView>
-        <Section header="Blocked Contacts">
-          {filteredContacts.map(contact => (
-            <Cell
-              key={contact.id}
-              cellStyle="Subtitle"
-              title={contact.name}
-              detail={`${contact.phone} - ${contact.reason}`}
-              accessory="DetailDisclosure"
-              onPress={() => removeContact(contact.id)}
-            />
-          ))}
-        </Section> 
-      </TableView>
+      <View style={styles.tableContainer}>
+        <View style={styles.tableHeader}>
+          <Text style={[styles.headerCell, styles.numberCell]}>Number</Text>
+          <Text style={[styles.headerCell, styles.reasonCell]}>Reason</Text>
+        </View>
+        {filteredContacts.map(contact => (
+          <View key={contact.id} style={styles.tableRow}>
+            <Text style={[styles.cell, styles.numberCell]}>{contact.number}</Text>
+            <Text style={[styles.cell, styles.reasonCell]}>{contact.reason}</Text>
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  stage: {
+  container: {
+    flexGrow: 1,
     backgroundColor: '#EFEFF4',
-    paddingTop: 20,
-    paddingBottom: 20,
+    paddingVertical: 20,
   },
   searchContainer: {
-    padding: 10,
-  },
-  searchInput: {
-    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center', 
+    paddingHorizontal: 16,
+    marginBottom: 16,
     borderColor: 'gray',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
+    borderRadius: 8,
     backgroundColor: 'white',
+    marginHorizontal: 16,
+  },
+  searchInput: {
+    flex: 1, 
+    height: 40,
+    paddingHorizontal: 5,
+    backgroundColor: 'white',
+    color: 'black',
+  },
+  searchIcon: {
+    marginLeft: 8,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#EFEFF4',
+  },
+  tableContainer: {
+    marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F5',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  headerCell: {
+    fontWeight: 'bold',
+    padding: 12,
+    color: '#111',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  cell: {
+    padding: 12,
+  },
+  numberCell: {
+    flex: 2,
+    borderRightWidth: 1,
+    borderRightColor: '#E0E0E0',
+  },
+  reasonCell: {
+    flex: 3,
   },
 });

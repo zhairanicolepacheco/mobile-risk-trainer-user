@@ -31,10 +31,10 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     header: {
-        alignSelf: 'flex-start',
-        fontSize: 28,
+        alignSelf: 'center',
+        fontSize: 32,
         fontWeight: '700',
-        marginTop: 20,
+        marginVertical: 20,
         color: '#FFFFFF',
     },
     subheader: {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        borderColor: '#FFFFFF',
+        borderColor: '#757575',
         borderWidth: 1,
         borderRadius: 20,
         marginBottom: 15,
@@ -55,12 +55,12 @@ const styles = StyleSheet.create({
     },
     icon: {
         paddingLeft: 20,
-        paddingRight: 10,
+        paddingRight: 20,
     },
     input: {
         height: 40,
         flex: 1,
-        padding: 10,
+        paddingVertical: 10,
         borderRadius: 20,
         color: '#000000',
     },

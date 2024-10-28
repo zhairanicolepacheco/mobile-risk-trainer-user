@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Progress from 'react-native-progress';
 import Smishing from './Smishing';
 import { HelloWave } from '../components/HelloWave';
+import LinearGradient from 'react-native-linear-gradient';
 
 type RootStackParamList = {
   Content: undefined;
@@ -27,12 +28,16 @@ function Content({ navigation }: Props) {
   }, []);
 
   return (
-    <ScrollView style={styles.container}>
+    <LinearGradient
+    colors={['#006769', '#40A578'] as [string, string]}
+    style={styles.container}
+    >
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
       {/* Header Image */}
-      <Animated.Image
+      <Image
         source={require('../assets/smishing.png')}
         style={styles.image}
-        sharedTransitionTag="tag"
+        // sharedTransitionTag="tag"
       />
 
       {/* Welcome Text */}
@@ -68,6 +73,7 @@ function Content({ navigation }: Props) {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </LinearGradient>
   );
 }
 
@@ -84,7 +90,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f1f1f1',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   image: {
     width: '100%',
@@ -114,7 +123,7 @@ const styles = StyleSheet.create({
   button: {
     height: 50,
     width: '100%',
-    backgroundColor: '#059212',
+    backgroundColor: '#fff',
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
@@ -126,7 +135,7 @@ const styles = StyleSheet.create({
     marginBottom: 100,
   },
   buttonText: {
-    color: '#fff',
+    color: '#059212',
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',

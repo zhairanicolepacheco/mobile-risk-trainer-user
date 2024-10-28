@@ -1,4 +1,12 @@
 {
-  "name": "MrtProject",
-  "displayName": "MrtProject"
+  "expo": {
+    "name": "MRTUser",
+    "slug": "MRTUser",
+    "version": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "232ac5d8-9660-43f6-8ebe-029741583790"
+      }
+    }
+  }
 }

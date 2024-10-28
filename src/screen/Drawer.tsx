@@ -1,6 +1,6 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import { useColorScheme } from '../hooks/useColorScheme';
 import Tabs from './BottomTab';
@@ -39,14 +39,11 @@ export default function DrawerDashboard({ route }: Props) {
         
       <Drawer.Screen
         name="Mobile Risk Trainer"
-        options={{
+        options={{ 
           title: 'Mobile Risk Trainer',
           drawerIcon: ({color, size, focused}) => (
-            <Ionicons
-              name={focused ? 'shield' : 'shield-outline'}
-              color={color}
-              size={size}
-            />
+            <Ionicons name={focused ? 'home' : 'home-outline'} color={color} size={size} />
+
           ),
         }}
       >
