@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import LinearGradient from 'react-native-linear-gradient';
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
-import styles from '../../src/styles/styles';
+import styles from '../styles/styles';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type RootStackParamList = {
@@ -25,7 +25,7 @@ type RootStackParamList = {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-export default function Component({ navigation }: Props) {
+export default function Login({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -87,7 +87,7 @@ export default function Component({ navigation }: Props) {
       >
         <View style={styles.content}>
           <Image
-            source={require('../../src/assets/mrt.png')}
+            source={require('../assets/mrt.png')}
             style={styles.logo}
           />
 
@@ -95,32 +95,33 @@ export default function Component({ navigation }: Props) {
           <Text style={styles.tagline}>A Mobile App for Smishing Attack Awareness</Text>
 
           <Text style={styles.header}>LOGIN</Text>
-          {/* <Text style={styles.subheader}>Please log in to continue.</Text> */}
 
           <View style={styles.inputContainer}>
-          <Ionicons name="mail-outline" size={20} color="#888" style={styles.icon} />
-          <TextInput
+            <Ionicons name="mail-outline" size={20} color="#888" style={styles.icon} />
+            <TextInput
               style={styles.input}
               placeholder="Email"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               placeholderTextColor="#888"
+              accessibilityLabel="Email input"
             />
           </View>
 
           <View style={styles.inputContainer}>
-          <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.icon} />
-          <TextInput
+            <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.icon} />
+            <TextInput
               style={styles.input}
               placeholder="Password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
               placeholderTextColor="#888"
+              accessibilityLabel="Password input"
             />
             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.icon}>
-            <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#888"/>
+              <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#888"/>
             </TouchableOpacity>
           </View>
 

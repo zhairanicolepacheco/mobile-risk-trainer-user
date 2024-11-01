@@ -6,15 +6,16 @@ import {
   View,
   Alert,
   ActivityIndicator,
-  Text
+  Text,
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 
 type ReportedContact = {
   id: string;
   number: string;
   reason: string;
+  reportedAt: FirebaseFirestoreTypes.Timestamp;
 };
 
 type ReportedContactsListProps = {
@@ -29,11 +30,12 @@ export default function ReportedContactsList({ userId }: ReportedContactsListPro
   useEffect(() => {
     const fetchReportedContacts = async () => {
       try {
-        const reportedContactsRef = firestore().collection('users').doc(userId).collection('reportedContacts');
+        const reportedContactsRef = firestore().collection('reportedNumbers').where('reportedBy', '==', userId);
         const snapshot = await reportedContactsRef.get();
         const fetchedContacts = snapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          reportedAt: doc.data().reportedAt as FirebaseFirestoreTypes.Timestamp
         } as ReportedContact));
         setReportedContacts(fetchedContacts);
       } catch (error) {
@@ -54,6 +56,16 @@ export default function ReportedContactsList({ userId }: ReportedContactsListPro
     );
   }, [reportedContacts, searchQuery]);
 
+  const groupedContacts = useMemo(() => {
+    return filteredContacts.reduce((acc, contact) => {
+      if (!acc[contact.reason]) {
+        acc[contact.reason] = [];
+      }
+      acc[contact.reason].push(contact);
+      return acc;
+    }, {} as Record<string, ReportedContact[]>);
+  }, [filteredContacts]);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -65,7 +77,6 @@ export default function ReportedContactsList({ userId }: ReportedContactsListPro
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.searchContainer}>
-        
         <TextInput
           style={styles.searchInput}
           placeholder="Search reported contacts..."
@@ -74,18 +85,28 @@ export default function ReportedContactsList({ userId }: ReportedContactsListPro
         />
         <Ionicons name="search" size={20} color="gray" style={styles.searchIcon} />
       </View>
-      <View style={styles.tableContainer}>
-        <View style={styles.tableHeader}>
-          <Text style={[styles.headerCell, styles.numberCell]}>Number</Text>
-          <Text style={[styles.headerCell, styles.reasonCell]}>Reason</Text>
-        </View>
-        {filteredContacts.map(contact => (
-          <View key={contact.id} style={styles.tableRow}>
-            <Text style={[styles.cell, styles.numberCell]}>{contact.number}</Text>
-            <Text style={[styles.cell, styles.reasonCell]}>{contact.reason}</Text>
+      {Object.entries(groupedContacts).map(([reason, contacts]) => (
+        <View key={reason} style={styles.reasonGroup}>
+          <Text style={styles.reasonTitle}>{reason}</Text>
+          <View style={styles.tableContainer}>
+            <View style={styles.tableHeader}>
+              <Text style={[styles.headerCell, styles.numberCell]}>Number</Text>
+              <Text style={[styles.headerCell, styles.dateCell]}>Date Reported</Text>
+            </View>
+            {contacts.map(contact => (
+              <View key={contact.id} style={styles.tableRow}>
+                <Text style={[styles.cell, styles.numberCell]}>{contact.number}</Text>
+                <Text style={[styles.cell, styles.dateCell]}>
+                  {contact.reportedAt.toDate().toLocaleDateString()}
+                </Text>
+              </View>
+            ))}
           </View>
-        ))}
-      </View>
+        </View>
+      ))}
+      {filteredContacts.length === 0 && (
+        <Text style={styles.noResultsText}>No reported contacts found.</Text>
+      )}
     </ScrollView>
   );
 }
@@ -123,6 +144,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#EFEFF4',
   },
+  reasonGroup: {
+    marginBottom: 24,
+  },
+  reasonTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    marginLeft: 16,
+    color: '#333',
+  },
   tableContainer: {
     marginHorizontal: 16,
     borderWidth: 1,
@@ -154,7 +185,13 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: '#E0E0E0',
   },
-  reasonCell: {
+  dateCell: {
     flex: 3,
+  },
+  noResultsText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#666',
   },
 });

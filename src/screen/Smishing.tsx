@@ -44,7 +44,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Smishing Section */}
       <TouchableOpacity onPress={toggleSmishing} style={styles.sectionHeader}>
         <Text style={styles.headerText}>What is Smishing?</Text>
-        <Ionicons name={collapsedSmishing ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
+        <Ionicons name={collapsedSmishing ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedSmishing}>
         <View style={styles.sectionContent}>
@@ -57,7 +57,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Cause Section */}
       <TouchableOpacity onPress={toggleCause} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Causes of Smishing</Text>
-        <Ionicons name={collapsedCause ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
+        <Ionicons name={collapsedCause ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedCause}>
         <View style={styles.sectionContent}>
@@ -78,7 +78,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Effect Section */}
       <TouchableOpacity onPress={toggleEffect} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Effects of Smishing</Text>
-        <Ionicons name={collapsedEffect ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
+        <Ionicons name={collapsedEffect ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedEffect}>
         <View style={styles.sectionContent}>
@@ -99,7 +99,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Types Section */}
       <TouchableOpacity onPress={toggleTypes} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Types of Smishing Attacks</Text>
-        <Ionicons name={collapsedTypes ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
+        <Ionicons name={collapsedTypes ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedTypes}>
         <View style={styles.sectionContent}>
@@ -116,7 +116,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Sample Section */}
       <TouchableOpacity onPress={toggleSample} style={styles.sectionHeader}>
         <Text style={styles.headerText}>Examples</Text>
-        <Ionicons name={collapsedSample ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
+        <Ionicons name={collapsedSample ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedSample}>
         <View style={styles.sectionContent}>
@@ -149,7 +149,7 @@ export default function Smishing({ navigation }: Props) {
       {/* Reference Section */}
       <TouchableOpacity onPress={toggleReference} style={styles.sectionHeader}>
         <Text style={styles.headerText}>References</Text>
-        <Ionicons name={collapsedReference ? 'chevron-up-outline' : 'chevron-down-outline'} size={20} color="#059212" />
+        <Ionicons name={collapsedReference ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
       </TouchableOpacity>
       <Collapsible collapsed={collapsedReference}>
         <View style={styles.sectionContent}>
