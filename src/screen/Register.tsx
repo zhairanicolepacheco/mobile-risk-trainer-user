@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import LinearGradient from 'react-native-linear-gradient';
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
-import styles from '../../src/styles/styles';
+import styles from '../styles/styles';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type RootStackParamList = {
@@ -23,6 +23,7 @@ type RootStackParamList = {
   Login: undefined;
   Drawer: { userId: string };
 };
+
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
 export default function Register({ navigation }: Props) {
@@ -74,7 +75,6 @@ export default function Register({ navigation }: Props) {
       }
 
       const db = firestore();
-      const batch = db.batch();
       const usernameRef = db.collection('users').where('username', '==', username).limit(1);
       const phoneRef = db.collection('users').where('phoneNumber', '==', phoneNumber).limit(1);
 
@@ -167,13 +167,13 @@ export default function Register({ navigation }: Props) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <LinearGradient
-        colors={['#006769', '#40A578'] as [string, string]}
+        colors={['#006769', '#40A578']}
         style={styles.container}
       >
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
           <View style={styles.content}>
             <Image
-              source={require('../../src/assets/mrt.png')}
+              source={require('../assets/mrt.png')}
               style={styles.logo}
             />
 
@@ -181,7 +181,6 @@ export default function Register({ navigation }: Props) {
             <Text style={styles.tagline}>A Mobile App for Smishing Attack Awareness</Text>
 
             <Text style={styles.header}>REGISTER</Text>
-            {/* <Text style={styles.subheader}>Create a new account</Text> */}
 
             <View style={styles.inputContainer}>
               <Ionicons name="person-outline" size={20} color="#888" style={styles.icon} />
@@ -209,7 +208,7 @@ export default function Register({ navigation }: Props) {
             </View>
 
             <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color="#888" style={styles.icon} />
+              <Ionicons name="mail-outline" size={20} color="#888" style={styles.icon} />
               <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -222,7 +221,7 @@ export default function Register({ navigation }: Props) {
             </View>
 
             <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.icon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.icon} />
               <TextInput
                 style={styles.input}
                 placeholder="Password"
@@ -233,12 +232,12 @@ export default function Register({ navigation }: Props) {
                 accessibilityLabel="Password input"
               />
               <TouchableOpacity onPress={() => togglePasswordVisibility('password')} style={styles.icon}>
-              <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#888"/>
+                <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#888"/>
               </TouchableOpacity>
             </View>
 
             <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.icon} />
+              <Ionicons name="lock-closed-outline" size={20} color="#888" style={styles.icon} />
               <TextInput
                 style={styles.input}
                 placeholder="Confirm Password"
@@ -249,7 +248,7 @@ export default function Register({ navigation }: Props) {
                 accessibilityLabel="Confirm password input"
               />
               <TouchableOpacity onPress={() => togglePasswordVisibility('confirm')} style={styles.icon}>
-              <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#888"/>
+                <Ionicons name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#888"/>
               </TouchableOpacity>
             </View>
 

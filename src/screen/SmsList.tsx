@@ -28,7 +28,7 @@ export default function SmsList() {
   const fetchSMS = () => {
     const filter = {
       box: 'inbox' as const,
-      maxCount: 30,
+      maxCount: 50,
     };
 
     SmsAndroid.list(
@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f0f2f5',
+    margin: 5,
   },
   senderGroup: {
     backgroundColor: 'white',
