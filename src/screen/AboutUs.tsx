@@ -6,7 +6,8 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native';
-import { Cell, Section, TableView } from 'react-native-tableview-simple';
+import LinearGradient from 'react-native-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ExpandedState {
   aboutUs: boolean;
@@ -35,12 +36,13 @@ export default function AboutScreen() {
     title: string,
     content: string
   ) => (
-    <Section key={key}>
-      <TouchableOpacity onPress={() => toggleSection(key)}>
-        <Cell
-          cellStyle="Basic"
-          title={title}
-          accessory={expanded[key] ? "DisclosureIndicator" : "Detail"}
+    <View key={key} style={styles.section}>
+      <TouchableOpacity onPress={() => toggleSection(key)} style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <Ionicons 
+          name={expanded[key] ? 'chevron-up' : 'chevron-down'} 
+          size={24} 
+          color="#ffffff" 
         />
       </TouchableOpacity>
       {expanded[key] && (
@@ -48,12 +50,13 @@ export default function AboutScreen() {
           <Text style={styles.collapseText}>{content}</Text>
         </View>
       )}
-    </Section>
+    </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={styles.stage}>
-      <TableView>
+    <LinearGradient colors={['#006769', '#40A578']} style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* <Text style={styles.headerText}>About</Text> */}
         {renderSection(
           "aboutUs",
           "About Us",
@@ -67,29 +70,57 @@ export default function AboutScreen() {
         {renderSection(
           "privacyPolicy",
           "Privacy Policy",
-          "This Privacy Policy describes how Mobile Risk Trainer collects, uses, and discloses your personal information when you use our services or otherwise communicate with us."
+          "This Privacy Policy describes how Mobile Risk Trainer collects, uses, and discloses your personal information when you use our services or otherwise communicate with us. For purposes of this Privacy Policy, ''you'' and ''your'' means you as the user of the Services, whether you are a customer, website visitor, or another individual whose information we have collected pursuant to this Privacy Policy."
         )}
         {renderSection(
           "contactUs",
           "Contact Us",
           "Email: mobile.risk.trainer@gmail.com"
         )}
-      </TableView>
-    </ScrollView>
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  stage: {
-    backgroundColor: '#EFEFF4',
-    paddingTop: 20,
-    paddingBottom: 20,
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  headerText: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 20,
+  },
+  section: {
+    marginBottom: 16,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   collapseContent: {
-    padding: 10,
-    backgroundColor: '#FFFFFF',
+    padding: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   collapseText: {
-    color: '#333333',
+    color: '#ffffff',
+    fontSize: 16,
+    lineHeight: 24,
   },
 });

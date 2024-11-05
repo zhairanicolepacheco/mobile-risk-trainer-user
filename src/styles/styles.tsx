@@ -12,13 +12,12 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
+        paddingVertical: 30,
         paddingHorizontal: 20,
     },
     logo: {
-        width: 150,
-        height: 163,
-        marginBottom: 20,
+        width: 200,
+        height: 200,
     },
     title: {
         fontSize: 28,
@@ -75,7 +74,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     buttonText: {
-        color: '#059212',
+        color: '#006769',
         fontSize: 14,
         fontWeight: 'bold',
         textAlign: 'center',

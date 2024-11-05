@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,9 +11,11 @@ import {
   ActivityIndicator,
   PermissionsAndroid,
   Platform,
+  RefreshControl,
 } from 'react-native';
 import RNContacts from 'react-native-contacts';
 import { Ionicons } from '@expo/vector-icons';
+import LinearGradient from 'react-native-linear-gradient';
 
 interface Contact {
   recordID: string;
@@ -38,6 +40,7 @@ interface Section {
 export default function ContactsList() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const requestContactsPermission = async () => {
     if (Platform.OS === 'android') {
@@ -72,6 +75,7 @@ export default function ContactsList() {
       Alert.alert('Error', 'An error occurred while fetching contacts');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -79,7 +83,12 @@ export default function ContactsList() {
     fetchContacts();
   }, [fetchContacts]);
 
-  const sections = React.useMemo((): Section[] => {
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchContacts();
+  }, [fetchContacts]);
+
+  const sections = useMemo((): Section[] => {
     const sectionsMap: Record<string, Contact[]> = contacts.reduce((acc, contact) => {
       const lastName = contact.familyName || contact.givenName || '';
       const letter = lastName[0]?.toUpperCase() || '#';
@@ -95,30 +104,32 @@ export default function ContactsList() {
   }, [contacts]);
 
   const renderItem = useCallback(({ item }: { item: Contact }) => (
-    <TouchableOpacity onPress={() => Alert.alert('Contact Pressed', `You selected ${item.givenName} ${item.familyName}`)}>
-      <View style={styles.card}>
-        {item.thumbnailPath ? (
-          <Image
-            source={{ uri: item.thumbnailPath }}
-            style={styles.cardImg}
-          />
-        ) : (
-          <View style={[styles.cardImg, styles.cardAvatar]}>
-            <Text style={styles.cardAvatarText}>{item.givenName[0]}</Text>
-          </View>
-        )}
+    <TouchableOpacity 
+      onPress={() => Alert.alert('Contact Pressed', `You selected ${item.givenName} ${item.familyName}`)}
+      style={styles.card}
+    >
+      {item.thumbnailPath ? (
+        <Image
+          source={{ uri: item.thumbnailPath }}
+          style={styles.cardImg}
+        />
+      ) : (
+        <LinearGradient
+          colors={['#006769', '#007969']}
+          style={[styles.cardImg, styles.cardAvatar]}
+        >
+          <Text style={styles.cardAvatarText}>{item.givenName[0]}</Text>
+        </LinearGradient>
+      )}
 
-        <View style={styles.cardBody}>
-          <Text style={styles.cardTitle}>{`${item.givenName} ${item.familyName}`}</Text>
-          <Text style={styles.cardPhone}>
-            {item.phoneNumbers && item.phoneNumbers.length > 0 ? item.phoneNumbers[0].number : 'No phone number'}
-          </Text>
-        </View>
-
-        <View style={styles.cardAction}>
-          <Ionicons color="#9ca3af" name="chevron-forward" size={22} />
-        </View>
+      <View style={styles.cardBody}>
+        <Text style={styles.cardTitle}>{`${item.givenName} ${item.familyName}`}</Text>
+        <Text style={styles.cardPhone}>
+          {item.phoneNumbers && item.phoneNumbers.length > 0 ? item.phoneNumbers[0].number : 'No phone number'}
+        </Text>
       </View>
+
+      <Ionicons color="#006769" name="chevron-forward" size={22} />
     </TouchableOpacity>
   ), []);
 
@@ -130,34 +141,41 @@ export default function ContactsList() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+      <LinearGradient colors={['#006769', '#40A578']} style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </LinearGradient>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Contacts</Text>
-      </View>
+    <LinearGradient colors={['#006769', '#40A578']} style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Contacts</Text>
+        </View>
 
-      <SectionList<Contact, Section>
-        sections={sections}
-        keyExtractor={(item) => item.recordID}
-        renderItem={renderItem}
-        renderSectionHeader={renderSectionHeader}
-        stickySectionHeadersEnabled={true}
-        contentContainerStyle={styles.listContent}
-      />
-    </SafeAreaView>
+        <SectionList<Contact, Section>
+          sections={sections}
+          keyExtractor={(item) => item.recordID}
+          renderItem={renderItem}
+          renderSectionHeader={renderSectionHeader}
+          stickySectionHeadersEnabled={true}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ffffff" />
+          }
+        />
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+  },
+  safeArea: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
@@ -166,68 +184,63 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
   },
   title: {
     fontSize: 32,
     fontWeight: '700',
-    color: '#1d1d1d',
+    color: '#ffffff',
   },
   listContent: {
     paddingBottom: 24,
   },
   section: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingHorizontal: 24,
     paddingVertical: 8,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ffffff',
   },
   card: {
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderBottomWidth: 1,
-    borderColor: '#d6d6d6',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   cardImg: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   cardAvatar: {
-    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#9ca1ac',
   },
   cardAvatarText: {
-    fontSize: 19,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
   },
   cardBody: {
-    marginRight: 'auto',
-    marginLeft: 12,
+    flex: 1,
+    marginLeft: 16,
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: '600',
+    color: '#ffffff',
   },
   cardPhone: {
-    fontSize: 15,
-    lineHeight: 20,
-    fontWeight: '500',
-    color: '#616d79',
-    marginTop: 3,
-  },
-  cardAction: {
-    paddingLeft: 16,
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 2,
   },
 });
