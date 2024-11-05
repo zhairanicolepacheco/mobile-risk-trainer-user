@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, Image } from 'react-native';
 import Collapsible from 'react-native-collapsible';
-import Animated from 'react-native-reanimated';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,185 +13,145 @@ type RootStackParamList = {
 type Props = NativeStackScreenProps<RootStackParamList, 'Smishing'>;
 
 export default function Smishing({ navigation }: Props) {
-  const [collapsedSmishing, setCollapsedSmishing] = useState(true);
-  const [collapsedCause, setCollapsedCause] = useState(true);
-  const [collapsedEffect, setCollapsedEffect] = useState(true);
-  const [collapsedTypes, setCollapsedTypes] = useState(true);
-  const [collapsedSample, setCollapsedSample] = useState(true);
-  const [collapsedReference, setCollapsedReference] = useState(true);
+  const [collapsedSections, setCollapsedSections] = useState({
+    smishing: true,
+    cause: true,
+    effect: true,
+    types: true,
+    sample: true,
+    reference: true,
+  });
 
-  const toggleSmishing = () => setCollapsedSmishing(!collapsedSmishing);
-  const toggleCause = () => setCollapsedCause(!collapsedCause);
-  const toggleEffect = () => setCollapsedEffect(!collapsedEffect);
-  const toggleTypes = () => setCollapsedTypes(!collapsedTypes);
-  const toggleSample = () => setCollapsedSample(!collapsedSample);
-  const toggleReference = () => setCollapsedReference(!collapsedReference);
+  const toggleSection = (section: keyof typeof collapsedSections) => {
+    setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const renderSection = (title: string, content: React.ReactNode, section: keyof typeof collapsedSections) => (
+    <View style={styles.section}>
+      <TouchableOpacity onPress={() => toggleSection(section)} style={styles.sectionHeader}>
+        <Text style={styles.headerText}>{title}</Text>
+        <Ionicons 
+          name={collapsedSections[section] ? 'chevron-down-outline' : 'chevron-up-outline'} 
+          size={24} 
+          color="#fff" 
+        />
+      </TouchableOpacity>
+      <Collapsible collapsed={collapsedSections[section]}>
+        <View style={styles.sectionContent}>
+          {content}
+        </View>
+      </Collapsible>
+    </View>
+  );
 
   return (
     <LinearGradient
-    colors={['#006769', '#40A578'] as [string, string]}
-    style={styles.container}
+      colors={['#006769', '#40A578']}
+      style={styles.container}
     >
-    <ScrollView contentContainerStyle={styles.scrollViewContent}>
-      {/* Header Image */}
-      <Image
-        source={require('../assets/smishing2.png')}
-        style={styles.image}
-        // sharedTransitionTag="tag"
-      />
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <Image
+          source={require('../assets/smishing2.png')}
+          style={styles.image}
+        />
 
-      {/* Smishing Section */}
-      <TouchableOpacity onPress={toggleSmishing} style={styles.sectionHeader}>
-        <Text style={styles.headerText}>What is Smishing?</Text>
-        <Ionicons name={collapsedSmishing ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
-      </TouchableOpacity>
-      <Collapsible collapsed={collapsedSmishing}>
-        <View style={styles.sectionContent}>
-          <Text>
+        {renderSection(
+          "What is Smishing?",
+          <Text style={styles.text}>
             Smishing is a social engineering attack that combines SMS (short message service) with phishing. Scammers or attackers send fake messages containing harmful links to deceive individuals into compromising their mobile phones, which can have serious consequences such as financial loss, identity theft, and compromised personal information.
-          </Text>
+          </Text>,
+          "smishing"
+        )}
+
+        {renderSection(
+          "Causes of Smishing",
+          <>
+            <Text style={styles.subheader}>1. Taking Advantage of Trust in SMS:</Text>
+            <Text style={styles.text}>People tend to trust text messages more than emails, which often get caught in spam filters. Hackers take advantage of this trust by sending fake messages that look real.</Text>
+
+            <Text style={styles.subheader}>2. Less Security on Mobile Devices:</Text>
+            <Text style={styles.text}>Mobile phones usually don't have the same security features as computers, and a lot of people don't use security apps on their phones, making smishing easier.</Text>
+
+            <Text style={styles.subheader}>3. Pretending to Be Legitimate Organizations:</Text>
+            <Text style={styles.text}>Attackers often pose as trusted companies like banks, tricking people into believing the message is real.</Text>
+
+            <Text style={styles.subheader}>4. Easy Access to Personal Information:</Text>
+            <Text style={styles.text}>Data breaches and personal info shared online have made it easier for attackers to create convincing, personalized messages.</Text>
+          </>,
+          "cause"
+        )}
+
+        {renderSection(
+          "Effects of Smishing",
+          <>
+            <Text style={styles.subheader}>1. Identity Theft:</Text>
+            <Text style={styles.text}>Scammers can collect personal info like Social Security numbers to open accounts or apply for loans in the victim's name.</Text>
+
+            <Text style={styles.subheader}>2. Loss of Money:</Text>
+            <Text style={styles.text}>Many attacks aim to steal credit card or bank details, leading to unauthorized charges or withdrawals.</Text>
+
+            <Text style={styles.subheader}>3. Stolen Accounts:</Text>
+            <Text style={styles.text}>Victims may give up login info, allowing attackers to take over accounts and access sensitive information.</Text>
+
+            <Text style={styles.subheader}>4. Malware on Phones:</Text>
+            <Text style={styles.text}>Some smishing texts contain links that download malware onto the victim's phone, potentially stealing passwords and personal data.</Text>
+          </>,
+          "effect"
+        )}
+
+        {renderSection(
+          "Types of Smishing Attacks",
+          <>
+            <Text style={styles.listItem}>• Account Verification Scams</Text>
+            <Text style={styles.listItem}>• Prize or Lottery Scams</Text>
+            <Text style={styles.listItem}>• Tech Support Scams</Text>
+            <Text style={styles.listItem}>• Bank Fraud Alerts</Text>
+            <Text style={styles.listItem}>• Tax Scams</Text>
+            <Text style={styles.listItem}>• Service Cancellation</Text>
+            <Text style={styles.listItem}>• Malicious App downloads</Text>
+          </>,
+          "types"
+        )}
+
+        {renderSection(
+          "Examples",
+          <>
+            <Image source={require('../assets/sample1.jpg')} style={styles.sampleImage} />
+            <Image source={require('../assets/sample2.jpg')} style={styles.sampleImage} />
+            <Image source={require('../assets/sample3.jpg')} style={styles.sampleImage} />
+            <Image source={require('../assets/sample4.jpg')} style={styles.sampleImage} />
+          </>,
+          "sample"
+        )}
+
+        {renderSection(
+          "References",
+          <>
+            <Text style={styles.reference} onPress={() => Linking.openURL('https://www.researchgate.net/publication/366656299_Users_really_do_respond_to_smishing')}>
+              Rahman, M. L., Timko, D., Wali, H., & Neupane, A. (2022). Users really do respond to smishing.
+            </Text>
+            <Text style={styles.reference} onPress={() => Linking.openURL('https://web.archive.org/web/20220309084752/https:/www.ijcit.com/index.php/ijcit/article/download/201/55')}>
+              Njuguna, D., Kamau, J., & Kaburu, D. (2022). A Review of Smishing Attacks Mitigation Strategies.
+            </Text>
+            <Text style={styles.reference} onPress={() => Linking.openURL('https://us.norton.com/blog/emerging-threats/smishing')}>
+              Knezevic, O. (2024). What is smishing? Retrieved from https://us.norton.com/blog/emerging-threats/smishing
+            </Text>
+            <Text style={styles.reference} onPress={() => Linking.openURL('https://news.txtbuff.com/types-of-text-scams/')}>
+              Siñel, C. (2011). Types of text scams. Retrieved from https://news.txtbuff.com/types-of-text-scams/
+            </Text>
+            <Text style={styles.reference} onPress={() => Linking.openURL('https://www.kaspersky.com/resource-center/threats/what-is-smishing-and-how-to-defend-against-it')}>
+              Kaspersky (2024). What is smishing and how to defend against it. Retrieved from https://www.kaspersky.com/resource-center/threats/what-is-smishing-and-how-to-defend-against-it
+            </Text>
+          </>,
+          "reference"
+        )}
+
+        <View style={styles.btnContainer}>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
+            <Text style={styles.buttonText}>Go back</Text>
+          </TouchableOpacity>
         </View>
-      </Collapsible>
-
-      {/* Cause Section */}
-      <TouchableOpacity onPress={toggleCause} style={styles.sectionHeader}>
-        <Text style={styles.headerText}>Causes of Smishing</Text>
-        <Ionicons name={collapsedCause ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
-      </TouchableOpacity>
-      <Collapsible collapsed={collapsedCause}>
-        <View style={styles.sectionContent}>
-          <Text style={styles.bold}>1. Taking Advantage of Trust in SMS:</Text>
-          <Text>People tend to trust text messages more than emails, which often get caught in spam filters. Hackers take advantage of this trust by sending fake messages that look real.</Text>
-
-          <Text style={styles.bold}>2. Less Security on Mobile Devices:</Text>
-          <Text>Mobile phones usually don’t have the same security features as computers, and a lot of people don’t use security apps on their phones, making smishing easier.</Text>
-
-          <Text style={styles.bold}>3. Pretending to Be Legitimate Organizations:</Text>
-          <Text>Attackers often pose as trusted companies like banks, tricking people into believing the message is real.</Text>
-
-          <Text style={styles.bold}>4. Easy Access to Personal Information:</Text>
-          <Text>Data breaches and personal info shared online have made it easier for attackers to create convincing, personalized messages.</Text>
-        </View>
-      </Collapsible>
-
-      {/* Effect Section */}
-      <TouchableOpacity onPress={toggleEffect} style={styles.sectionHeader}>
-        <Text style={styles.headerText}>Effects of Smishing</Text>
-        <Ionicons name={collapsedEffect ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
-      </TouchableOpacity>
-      <Collapsible collapsed={collapsedEffect}>
-        <View style={styles.sectionContent}>
-          <Text style={styles.bold}>1. Identity Theft:</Text>
-          <Text>Scammers can collect personal info like Social Security numbers to open accounts or apply for loans in the victim’s name.</Text>
-
-          <Text style={styles.bold}>2. Loss of Money:</Text>
-          <Text>Many attacks aim to steal credit card or bank details, leading to unauthorized charges or withdrawals.</Text>
-
-          <Text style={styles.bold}>3. Stolen Accounts:</Text>
-          <Text>Victims may give up login info, allowing attackers to take over accounts and access sensitive information.</Text>
-
-          <Text style={styles.bold}>4. Malware on Phones:</Text>
-          <Text>Some smishing texts contain links that down-outlineload malware onto the victim’s phone, potentially stealing passwords and personal data.</Text>
-        </View>
-      </Collapsible>
-
-      {/* Types Section */}
-      <TouchableOpacity onPress={toggleTypes} style={styles.sectionHeader}>
-        <Text style={styles.headerText}>Types of Smishing Attacks</Text>
-        <Ionicons name={collapsedTypes ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
-      </TouchableOpacity>
-      <Collapsible collapsed={collapsedTypes}>
-        <View style={styles.sectionContent}>
-          <Text style={styles.bold}>- Account Verification Scams</Text>
-          <Text style={styles.bold}>- Prize or Lottery Scams</Text>
-          <Text style={styles.bold}>- Tech Support Scams</Text>
-          <Text style={styles.bold}>- Bank Fraud Alerts</Text>
-          <Text style={styles.bold}>- Tax Scams</Text>
-          <Text style={styles.bold}>- Service Cancellation</Text>
-          <Text style={styles.bold}>- Malicious App down-outlineloads</Text>
-        </View>
-      </Collapsible>
-
-      {/* Sample Section */}
-      <TouchableOpacity onPress={toggleSample} style={styles.sectionHeader}>
-        <Text style={styles.headerText}>Examples</Text>
-        <Ionicons name={collapsedSample ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
-      </TouchableOpacity>
-      <Collapsible collapsed={collapsedSample}>
-        <View style={styles.sectionContent}>
-          <Image
-            source={require('../assets/sample1.jpg')}
-            style={styles.image}
-            // sharedTransitionTag="tag1"
-          />
-
-        <Image
-          source={require('../assets/sample2.jpg')}
-          style={styles.image}
-          // sharedTransitionTag="tag2"
-        />
-
-        <Image
-          source={require('../assets/sample3.jpg')}
-          style={styles.image}
-          // sharedTransitionTag="tag3"
-        />
-
-        <Image
-          source={require('../assets/sample4.jpg')}
-          style={styles.image}
-          // sharedTransitionTag="tag4"
-        />
-        </View>
-      </Collapsible>
-
-      {/* Reference Section */}
-      <TouchableOpacity onPress={toggleReference} style={styles.sectionHeader}>
-        <Text style={styles.headerText}>References</Text>
-        <Ionicons name={collapsedReference ? 'chevron-down-outline' : 'chevron-up-outline'} size={20} color="#059212" />
-      </TouchableOpacity>
-      <Collapsible collapsed={collapsedReference}>
-        <View style={styles.sectionContent}>
-          <Text
-            style={styles.reference}
-            onPress={() => Linking.openURL('https://www.researchgate.net/publication/366656299_Users_really_do_respond_to_smishing')}
-          >
-            Rahman, M. L., Timko, D., Wali, H., & Neupane, A. (2022). Users really do respond to smishing.
-          </Text>
-          <Text
-            style={styles.reference}
-            onPress={() => Linking.openURL('https://web.archive.org/web/20220309084752/https:/www.ijcit.com/index.php/ijcit/article/down-outlineload/201/55')}
-          >
-            Njuguna, D., Kamau, J., & Kaburu, D. (2022). A Review of Smishing Attacks Mitigation Strategies.
-          </Text>
-          <Text
-            style={styles.reference}
-            onPress={() => Linking.openURL('https://us.norton.com/blog/emerging-threats/smishing')}
-          >
-            Knezevic, O. (2024). What is smishing? Retrieved from https://us.norton.com/blog/emerging-threats/smishing
-          </Text>
-          <Text
-            style={styles.reference}
-            onPress={() => Linking.openURL('https://news.txtbuff.com/types-of-text-scams/')}
-          >
-            Siñel, C. (2011). Types of text scams. Retrieved from https://news.txtbuff.com/types-of-text-scams/
-          </Text>
-          <Text
-            style={styles.reference}
-            onPress={() => Linking.openURL('https://www.kaspersky.com/resource-center/threats/what-is-smishing-and-how-to-defend-against-it')}
-          >
-            Kaspersky (2024). What is smishing and how to defend against it. Retrieved from https://www.kaspersky.com/resource-center/threats/what-is-smishing-and-how-to-defend-against-it
-          </Text>
-        </View>
-      </Collapsible>
-
-      {/* Go Back Button */}
-      <View style={styles.btnContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.goBack()}>
-          <Text style={styles.buttonText}>Go back</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -200,73 +159,87 @@ export default function Smishing({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f1f1f1',
   },
   scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
   },
   image: {
     width: '100%',
     height: 200,
-    alignSelf: 'center',
-    marginBottom: 20,
     borderRadius: 10,
+    marginBottom: 20,
+  },
+  section: {
+    marginBottom: 16,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#eaeaea',
-    borderRadius: 5,
-    marginBottom: 5,
+    padding: 16,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
   },
   headerText: {
-    fontSize: 20, // Increased from 18
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#059212',
+    color: '#fff',
   },
   sectionContent: {
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginBottom: 10,
+    padding: 16,
   },
-  bold: {
-    fontWeight: 'bold',
+  text: {
+    color: '#fff',
     fontSize: 16,
+    marginBottom: 8,
+  },
+  subheader: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  listItem: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  sampleImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  reference: {
+    color: '#fff',
+    fontSize: 14,
+    textDecorationLine: 'underline',
+    marginBottom: 8,
+  },
+  btnContainer: {
+    marginTop: 20,
+    marginBottom: 100,
   },
   button: {
-    height: 50,
-    width: '100%',
     backgroundColor: '#fff',
     borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    marginTop: 20,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonText: {
-    color: '#059212',
+    color: '#006769',
     fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  btnContainer: {
-    paddingBottom: 150,
-  },
-  reference: {
-    fontSize: 14,
-    color: '#1e90ff',
-    textDecorationLine: 'underline',
-    marginBottom: 10,
-  },
-  regularText: {
-    fontSize: 16,
   },
 });

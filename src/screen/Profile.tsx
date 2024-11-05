@@ -1,27 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SvgXml } from 'react-native-svg';
 import firestore from '@react-native-firebase/firestore';
-
-const defaultProfileSvg = `
-<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="60" cy="60" r="60" fill="#DCFCE7"/>
-  <circle cx="60" cy="45" r="20" fill="#22C55E"/>
-  <path d="M60 70C43.4315 70 30 83.4315 30 100C30 110 60 110 60 110C60 110 90 110 90 100C90 83.4315 76.5685 70 60 70Z" fill="#22C55E"/>
-</svg>
-`;
+import LinearGradient from 'react-native-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 type UserProfileProps = {
   userId: string;
 };
 
+type UserData = {
+  username: string;
+  phoneNumber: string;
+  email: string;
+};
+
 export default function UserProfile({ userId }: UserProfileProps) {
-  const [userData, setUserData] = useState<{
-    username: string;
-    phoneNumber: string;
-    email: string;
-  } | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,7 +24,7 @@ export default function UserProfile({ userId }: UserProfileProps) {
       try {
         const userDoc = await firestore().collection('users').doc(userId).get();
         if (userDoc.exists) {
-          setUserData(userDoc.data() as { username: string; phoneNumber: string; email: string });
+          setUserData(userDoc.data() as UserData);
         } else {
           console.log('No such user!');
         }
@@ -45,67 +40,101 @@ export default function UserProfile({ userId }: UserProfileProps) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#22C55E" />
-      </View>
+      <LinearGradient colors={['#006769', '#40A578']} style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </LinearGradient>
     );
   }
 
   if (!userData) {
     return (
-      <View style={styles.errorContainer}>
+      <LinearGradient colors={['#006769', '#40A578']} style={styles.errorContainer}>
         <Text style={styles.errorText}>Failed to load user data</Text>
-      </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <View style={styles.avatarContainer}>
-            <SvgXml xml={defaultProfileSvg} width={120} height={120} />
+    <LinearGradient colors={['#006769', '#40A578']} style={styles.container}>
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <View style={styles.avatarContainer}>
+              <Image source={require('../assets/default.jpg')} style={styles.avatar} />
+              {/* <TouchableOpacity style={styles.editButton}>
+                <Ionicons name="pencil" size={20} color="#ffffff" />
+              </TouchableOpacity> */}
+            </View>
+            <Text style={styles.username}>{userData.username}</Text>
           </View>
-          <Text style={styles.username}>{userData.username}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Phone</Text>
-            <Text style={styles.infoValue}>{userData.phoneNumber}</Text>
+          <View style={styles.infoContainer}>
+            <InfoItem iconName="call-outline" label="Phone" value={userData.phoneNumber} />
+            <InfoItem iconName="mail-outline" label="Email" value={userData.email} />
           </View>
-          <View style={styles.separator} />
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoValue}>{userData.email}</Text>
-          </View>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          {/* <TouchableOpacity style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={24} color="#ffffff" style={styles.logoutIcon} />
+            <Text style={styles.logoutText}>Log Out</Text>
+          </TouchableOpacity> */}
+        </ScrollView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
+
+const InfoItem = ({ iconName, label, value }: { iconName: keyof typeof Ionicons.glyphMap; label: string; value: string }) => (
+  <View style={styles.infoItem}>
+    <View style={styles.infoIconContainer}>
+      <Ionicons name={iconName} size={24} color="#ffffff" />
+    </View>
+    <View style={styles.infoContent}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0FFF4',
+  },
+  safeArea: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 24,
   },
   header: {
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#22C55E',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
+    padding: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    // borderBottomLeftRadius: 10,
+    // borderBottomRightRadius: 10,
   },
   avatarContainer: {
+    position: 'relative',
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
   },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 4,
+    borderColor: '#ffffff',
+  },
+  // editButton: {
+  //   position: 'absolute',
+  //   bottom: 0,
+  //   right: 0,
+  //   backgroundColor: '#40A578',
+  //   borderRadius: 20,
+  //   width: 40,
+  //   height: 40,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   borderWidth: 3,
+  //   borderColor: '#ffffff',
+  // },
   username: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -115,49 +144,74 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   infoContainer: {
-    margin: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 20,
+    margin: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    // elevation: 3,
   },
   infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
+  },
+  infoIconContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 12,
+    width: 48,
+    height: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  infoContent: {
+    marginVertical: 10,
+    flex: 1,
   },
   infoLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#15803D',
+    color: 'rgba(255, 255, 255, 0.7)',
     marginBottom: 4,
   },
   infoValue: {
     fontSize: 18,
-    color: '#333333',
+    color: '#FFFFFF',
   },
-  separator: {
-    height: 1,
-    backgroundColor: '#E5E7EB',
-    marginVertical: 16,
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 24,
+  },
+  logoutIcon: {
+    marginRight: 8,
+  },
+  logoutText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F0FFF4',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F0FFF4',
   },
   errorText: {
     fontSize: 18,
-    color: '#DC2626',
+    color: '#FFFFFF',
     textAlign: 'center',
   },
 });

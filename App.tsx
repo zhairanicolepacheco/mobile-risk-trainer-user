@@ -10,15 +10,12 @@ import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/
 import { createStackNavigator } from '@react-navigation/stack';
 import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
-import SmsAndroid from 'react-native-get-sms-android';
 import RegisterScreen from './src/screen/Register';
 import LoginScreen from './src/screen/Login';
 import DrawerScreen from './src/screen/Drawer';
 import PermissionsScreen from './src/screen/Permissions';
 import ReportReasonScreen from './src/screen/ReportReason';
 import { useColorScheme } from './src/hooks/useColorScheme';
-import BackgroundFetch from 'react-native-background-fetch';
 import PushNotification, { Importance } from 'react-native-push-notification';
 import SmsListener from 'react-native-android-sms-listener';
 
@@ -27,19 +24,18 @@ export type RootStackParamList = {
   Login: undefined;
   Drawer: { userId: string };
   Permissions: undefined;
-  ReportReason: { senderNumber: string; userId: string };
+  ReportReason: { senderNumber: string; userId: string; messageBody: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 
-export default function App() {
+export default function Component() {
     const [initializing, setInitializing] = useState(true);
     const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
     const [permissionsGranted, setPermissionsGranted] = useState(false);
     const [loading, setLoading] = useState(true);
     const colorScheme = useColorScheme();
     const navigationRef = useRef<any>(null);
-    const [lastCheckedTimestamp, setLastCheckedTimestamp] = useState(Date.now());
 
     const onAuthStateChanged = (user: FirebaseAuthTypes.User | null) => {
         setUser(user);
@@ -94,27 +90,6 @@ export default function App() {
         }
     };
 
-    // const setupBackgroundFetch = () => {
-    //     BackgroundFetch.configure(
-    //         {
-    //             minimumFetchInterval: 2,
-    //             stopOnTerminate: false,
-    //             startOnBoot: true,
-    //             enableHeadless: true,
-    //         },
-    //         async (taskId) => {
-    //             console.log("Background Fetch event:", taskId);
-    //             await checkForUrlsInMessages();
-    //             BackgroundFetch.finish(taskId);
-    //         },
-    //         (error) => {
-    //             console.log("Background Fetch failed to start", error);
-    //         }
-    //     );
-
-    //     BackgroundFetch.start();
-    // };
-
     const setupNotifications = () => {
         PushNotification.createChannel(
             {
@@ -132,14 +107,15 @@ export default function App() {
                 console.log("ACTION:", notification.action);
                 console.log("NOTIFICATION:", notification);
 
-                if (notification.action === "report" && user) {
-                    navigateToReportReason(notification.data.sender, user.uid);
+                if (notification.action === "Report" && user) {
+                    navigateToReportReason(notification.data.sender, user.uid, notification.data.messageBody);
                 }
             },
             onNotification: function(notification) {
                 console.log("NOTIFICATION:", notification);
-                if (notification.userInteraction && user) {
-                    navigateToReportReason(notification.data.sender, user.uid);
+                // Only navigate if the notification was not clicked for a specific action
+                if (notification.userInteraction && !notification.action && user) {
+                    navigateToReportReason(notification.data.sender, user.uid, notification.data.messageBody);
                 }
             },
             popInitialNotification: true,
@@ -163,43 +139,16 @@ export default function App() {
                 soundName: "default",
                 vibrate: true,
                 actions: '["Report"]',
-                data: { sender: message.originatingAddress },
+                data: { sender: message.originatingAddress, messageBody: message.body },
+                invokeApp: false, // This prevents the app from being opened automatically
             });
         }
     };
 
-    // const fetchMessages = () => {
-    //     return new Promise<any[]>((resolve, reject) => {
-    //         if (Platform.OS !== 'android') {
-    //             reject('SMS retrieval is only available on Android');
-    //             return;
-    //         }
-
-    //         const filter = {
-    //             box: 'inbox',
-    //             minDate: lastCheckedTimestamp,
-    //             maxCount: 10,
-    //         };
-
-    //         SmsAndroid.list(
-    //             JSON.stringify(filter),
-    //             (fail) => {
-    //                 console.log('Failed with this error: ' + fail);
-    //                 reject(fail);
-    //             },
-    //             (count, smsList) => {
-    //                 console.log('Count: ', count);
-    //                 const arr = JSON.parse(smsList);
-    //                 resolve(arr);
-    //             },
-    //         );
-    //     });
-    // };
-
-    const navigateToReportReason = (senderNumber: string, userId: string) => {
-        console.log("Navigating to ReportReason screen", { senderNumber, userId });
+    const navigateToReportReason = (senderNumber: string, userId: string, messageBody: string) => {
+        console.log("Navigating to ReportReason screen", { senderNumber, userId, messageBody });
         if (navigationRef.current) {
-            navigationRef.current.navigate('ReportReason', { senderNumber, userId });
+            navigationRef.current.navigate('ReportReason', { senderNumber, userId, messageBody });
         } else {
             console.log("Navigation ref is not available");
         }

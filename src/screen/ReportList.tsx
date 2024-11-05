@@ -7,9 +7,11 @@ import {
   Alert,
   ActivityIndicator,
   Text,
+  TouchableOpacity,
 } from 'react-native';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
+import LinearGradient from 'react-native-linear-gradient';
 
 type ReportedContact = {
   id: string;
@@ -68,81 +70,81 @@ export default function ReportedContactsList({ userId }: ReportedContactsListPro
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#22C55E" />
-      </View>
+      <LinearGradient colors={['#006769', '#40A578']} style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#ffffff" />
+      </LinearGradient>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <LinearGradient colors={['#006769', '#40A578']} style={styles.container}>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search reported contacts..."
+          placeholderTextColor="rgba(255, 255, 255, 0.6)"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        <Ionicons name="search" size={20} color="gray" style={styles.searchIcon} />
+        <Ionicons name="search" size={20} color="rgba(255, 255, 255, 0.8)" style={styles.searchIcon} />
       </View>
-      {Object.entries(groupedContacts).map(([reason, contacts]) => (
-        <View key={reason} style={styles.reasonGroup}>
-          <Text style={styles.reasonTitle}>{reason}</Text>
-          <View style={styles.tableContainer}>
-            <View style={styles.tableHeader}>
-              <Text style={[styles.headerCell, styles.numberCell]}>Number</Text>
-              <Text style={[styles.headerCell, styles.dateCell]}>Date Reported</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {Object.entries(groupedContacts).map(([reason, contacts]) => (
+          <View key={reason} style={styles.reasonGroup}>
+            <Text style={styles.reasonTitle}>{reason}</Text>
+            <View style={styles.tableContainer}>
+              {contacts.map(contact => (
+                <TouchableOpacity key={contact.id} style={styles.tableRow}>
+                  <Text style={[styles.cell, styles.numberCell]}>{contact.number}</Text>
+                  <Text style={[styles.cell, styles.dateCell]}>
+                    {contact.reportedAt.toDate().toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
             </View>
-            {contacts.map(contact => (
-              <View key={contact.id} style={styles.tableRow}>
-                <Text style={[styles.cell, styles.numberCell]}>{contact.number}</Text>
-                <Text style={[styles.cell, styles.dateCell]}>
-                  {contact.reportedAt.toDate().toLocaleDateString()}
-                </Text>
-              </View>
-            ))}
           </View>
-        </View>
-      ))}
-      {filteredContacts.length === 0 && (
-        <Text style={styles.noResultsText}>No reported contacts found.</Text>
-      )}
-    </ScrollView>
+        ))}
+        {filteredContacts.length === 0 && (
+          <Text style={styles.noResultsText}>No reported contacts found.</Text>
+        )}
+      </ScrollView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollContent: {
     flexGrow: 1,
-    backgroundColor: '#EFEFF4',
     paddingVertical: 20,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center', 
     paddingHorizontal: 16,
-    marginBottom: 16,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 8,
-    backgroundColor: 'white',
-    marginHorizontal: 16,
-  },
-  searchInput: {
-    flex: 1, 
-    height: 40,
-    paddingHorizontal: 5,
-    backgroundColor: 'white',
-    color: 'black',
-  },
-  searchIcon: {
-    marginLeft: 8,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#EFEFF4',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 20,
+    marginBottom: 16,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 1,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 12,
+    color: '#ffffff',
+  },
+  searchIcon: {
+    marginRight: 12,
   },
   reasonGroup: {
     marginBottom: 24,
@@ -151,39 +153,26 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
-    marginLeft: 16,
-    color: '#333',
+    color: '#ffffff',
   },
   tableContainer: {
-    marginHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
     borderRadius: 8,
     overflow: 'hidden',
-  },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#F5F5F5',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-  },
-  headerCell: {
-    fontWeight: 'bold',
-    padding: 12,
-    color: '#111',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
   cell: {
     padding: 12,
+    color: '#ffffff',
   },
   numberCell: {
     flex: 2,
     borderRightWidth: 1,
-    borderRightColor: '#E0E0E0',
+    borderRightColor: 'rgba(255, 255, 255, 0.1)',
   },
   dateCell: {
     flex: 3,
@@ -192,6 +181,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     fontSize: 16,
-    color: '#666',
+    color: '#ffffff',
   },
 });

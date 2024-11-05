@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Image, Linking } from 'react-native';
 import SmsAndroid from 'react-native-get-sms-android';
 import { format } from 'date-fns';
+import LinearGradient from 'react-native-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
 interface SMS {
@@ -13,13 +14,12 @@ interface SMS {
 
 interface GroupedSMS {
   sender: string;
-  messages: SMS[];
+  latestMessage: SMS;
 }
 
 export default function SmsList() {
   const [groupedMessages, setGroupedMessages] = useState<GroupedSMS[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [expandedSenders, setExpandedSenders] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchSMS();
@@ -28,7 +28,7 @@ export default function SmsList() {
   const fetchSMS = () => {
     const filter = {
       box: 'inbox' as const,
-      maxCount: 50,
+      maxCount: 300,
     };
 
     SmsAndroid.list(
@@ -49,16 +49,17 @@ export default function SmsList() {
   const groupMessagesBySender = (messages: SMS[]): GroupedSMS[] => {
     const groupedObj = messages.reduce((acc, message) => {
       if (!acc[message.address]) {
-        acc[message.address] = [];
+        acc[message.address] = message;
+      } else if (message.date > acc[message.address].date) {
+        acc[message.address] = message;
       }
-      acc[message.address].push(message);
       return acc;
-    }, {} as Record<string, SMS[]>);
+    }, {} as Record<string, SMS>);
 
-    return Object.entries(groupedObj).map(([sender, messages]) => ({
+    return Object.entries(groupedObj).map(([sender, latestMessage]) => ({
       sender,
-      messages: messages.sort((a, b) => b.date - a.date),
-    }));
+      latestMessage,
+    })).sort((a, b) => b.latestMessage.date - a.latestMessage.date);
   };
 
   const onRefresh = () => {
@@ -66,139 +67,132 @@ export default function SmsList() {
     fetchSMS();
   };
 
-  const toggleExpand = (sender: string) => {
-    setExpandedSenders((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(sender)) {
-        newSet.delete(sender);
-      } else {
-        newSet.add(sender);
-      }
-      return newSet;
-    });
+  const openDefaultMessagingApp = (sender: string) => {
+    Linking.openURL(`sms:${sender}`);
   };
 
-  const renderSenderGroup = ({ item }: { item: GroupedSMS }) => {
-    const isExpanded = expandedSenders.has(item.sender);
-    const latestMessage = item.messages[0];
-
+  const renderConversation = ({ item }: { item: GroupedSMS }) => {
     return (
-      <View style={styles.senderGroup}>
-        <TouchableOpacity onPress={() => toggleExpand(item.sender)} style={styles.senderHeader}>
-          <View style={styles.senderInfo}>
-            <Text style={styles.senderName}>{item.sender}</Text>
-            <Text style={styles.messageCount}>{item.messages.length} messages</Text>
-          </View>
-          <Ionicons name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'} size={24} color="#666" />
-        </TouchableOpacity>
-        {isExpanded ? (
-          item.messages.map((message) => renderSMS({ item: message }))
-        ) : (
-          <View style={styles.collapsedPreview}>
-            <Text style={styles.previewBody} numberOfLines={1}>
-              {latestMessage.body}
-            </Text>
-            <Text style={styles.previewDate}>{format(new Date(latestMessage.date), 'MMM d, yyyy')}</Text>
-          </View>
-        )}
-      </View>
+      <TouchableOpacity
+        style={styles.conversationItem}
+        onPress={() => openDefaultMessagingApp(item.sender)}
+      >
+        <LinearGradient
+          colors={['#006769', '#007969']}
+          style={styles.avatarContainer}
+        >
+          <Text style={styles.avatarText}>{item.sender[0].toUpperCase()}</Text>
+        </LinearGradient>
+        <View style={styles.conversationInfo}>
+          <Text style={styles.senderName}>{item.sender}</Text>
+          <Text style={styles.messagePreview} numberOfLines={1}>
+            {item.latestMessage.body}
+          </Text>
+        </View>
+        <View style={styles.dateContainer}>
+          <Text style={styles.messageDate}>
+            {format(new Date(item.latestMessage.date), 'MMM d')}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color="#006769" />
+        </View>
+      </TouchableOpacity>
     );
   };
 
-  const renderSMS = ({ item }: { item: SMS }) => (
-    <View style={styles.smsItem} key={item._id}>
-      <Text style={styles.smsBody}>{item.body}</Text>
-      <Text style={styles.smsDate}>{format(new Date(item.date), 'MMM d, yyyy h:mm a')}</Text>
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
+    <LinearGradient colors={['#006769', '#40A578']} style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Messages</Text>
+      </View>
       <FlatList
         data={groupedMessages}
-        renderItem={renderSenderGroup}
+        renderItem={renderConversation}
         keyExtractor={(item) => item.sender}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ffffff" />
         }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No messages found</Text>
+          <View style={styles.emptyContainer}>
+            <Ionicons name="chatbox-ellipses-outline" size={48} color="#ffffff" />
+            <Text style={styles.emptyText}>No messages found</Text>
+          </View>
         }
+        contentContainerStyle={styles.listContent}
       />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
-    margin: 5,
   },
-  senderGroup: {
-    backgroundColor: 'white',
-    marginBottom: 12,
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  header: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.2)',
   },
-  senderHeader: {
+  headerText: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  listContent: {
+    paddingVertical: 8,
+  },
+  conversationItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f8f9fa',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-  senderInfo: {
+  avatarContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  conversationInfo: {
     flex: 1,
   },
   senderName: {
     fontWeight: 'bold',
-    fontSize: 18,
-    color: '#333',
-  },
-  messageCount: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  collapsedPreview: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e1e4e8',
-  },
-  previewBody: {
     fontSize: 16,
-    color: '#333',
+    color: '#ffffff',
     marginBottom: 4,
   },
-  previewDate: {
+  messagePreview: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  dateContainer: {
+    alignItems: 'flex-end',
+  },
+  messageDate: {
     fontSize: 12,
-    color: '#666',
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginBottom: 4,
   },
-  smsItem: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e1e4e8',
-  },
-  smsBody: {
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 8,
-  },
-  smsDate: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'right',
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 48,
   },
   emptyText: {
     textAlign: 'center',
-    marginTop: 50,
+    marginTop: 16,
     fontSize: 16,
-    color: '#666',
+    color: '#ffffff',
   },
 });

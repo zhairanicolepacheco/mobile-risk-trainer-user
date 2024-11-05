@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import * as Progress from 'react-native-progress';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
+import * as Progress from 'react-native-progress';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import Smishing from './Smishing';
 import { HelloWave } from '../components/HelloWave';
+import Smishing from './Smishing';
 
 type RootStackParamList = {
   Content: undefined;
@@ -21,6 +21,7 @@ function Content({ navigation }: Props) {
   const [reportPercentage, setReportPercentage] = useState(0);
   const [totalReports, setTotalReports] = useState(0);
   const [userReports, setUserReports] = useState(0);
+  const [rank, setRank] = useState('Cybersecurity Intern');
 
   const fetchReportData = async () => {
     const currentUser = auth().currentUser;
@@ -28,38 +29,40 @@ function Content({ navigation }: Props) {
 
     const reportedNumbersRef = firestore().collection('reportedNumbers');
 
-    // Get total number of reports
     const totalSnapshot = await reportedNumbersRef.get();
     const total = totalSnapshot.size;
     setTotalReports(total);
 
-    // Get number of reports by current user
     const userSnapshot = await reportedNumbersRef
       .where('reportedBy', '==', currentUser.uid)
       .get();
     const userTotal = userSnapshot.size;
     setUserReports(userTotal);
 
-    // Calculate percentage (user reports out of 100)
-    const percentage = Math.min(userTotal, 100);
+    const percentage = Math.min(userTotal / 100, 1);
     setReportPercentage(percentage);
+
+    if (userTotal >= 400) setRank('Professional Cybersecurity Analyst');
+    else if (userTotal >= 300) setRank('Cyber Security Manager');
+    else if (userTotal >= 200) setRank('Senior Cybersecurity Officer');
+    else if (userTotal >= 100) setRank('Junior Cybersecurity Officer');
+    else setRank('Cybersecurity Intern');
   };
 
   useEffect(() => {
     fetchReportData();
-  }, []); // Empty dependency array to call on component mount
+  }, []);
 
   return (
     <LinearGradient colors={['#006769', '#40A578']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        {/* Header Image */}
         <Image
           source={require('../assets/smishing.png')}
           style={styles.image}
+          accessibilityLabel="Smishing illustration"
         />
 
-        {/* Welcome Text */}
-        <View style={styles.div}>
+        <View style={styles.card}>
           <Text style={styles.heading}>
             Welcome! <HelloWave />
           </Text>
@@ -68,35 +71,36 @@ function Content({ navigation }: Props) {
           </Text>
         </View>
 
-        {/* Progress Circle */}
-        <View style={styles.div}>
-          <Text style={styles.subheading}>
-            Your progress in becoming a Cyber Security Officer
-          </Text>
+        <View style={styles.card}>
+          <Text style={styles.rankText}>Your rank: {rank}</Text>
           <Progress.Circle
             size={150}
-            progress={reportPercentage / 100}
+            progress={reportPercentage}
             showsText={true}
-            color="#059212"
-            borderWidth={2}
+            color="#fff"
+            unfilledColor="rgba(255,255,255,0.2)"
+            borderWidth={0}
             thickness={10}
             style={styles.progress}
-            formatText={() => `${reportPercentage}%`}
+            textStyle={styles.progressText}
+            formatText={() => `${Math.floor(reportPercentage * 100)}%`}
           />
-          <Text style={styles.subheading}>
+          <Text style={styles.statsText}>
             Your reported numbers: {userReports}
           </Text>
-          <Text style={styles.smallText}>
+          <Text style={styles.statsText}>
             Total reports in the system: {totalReports}
           </Text>
         </View>
 
-        {/* Navigation Button */}
-        <View style={styles.btnContainer}>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Smishing')}>
-            <Text style={styles.buttonText}>Go to Smishing Details</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('Smishing')}
+          accessibilityLabel="Go to Smishing Details"
+          accessibilityHint="Navigate to the screen with detailed information about smishing"
+        >
+          <Text style={styles.buttonText}>Go to Smishing Details</Text>
+        </TouchableOpacity>
       </ScrollView>
     </LinearGradient>
   );
@@ -114,78 +118,74 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 1,
   },
   scrollViewContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
   },
   image: {
-    alignSelf: 'center',
-    width: '90%',
+    width: '100%',
     height: 200,
-    marginVertical: 10,
-    marginHorizontal: 20,
-    borderRadius: 15,
-    borderColor: '#ccc',
-    borderWidth: 1,
+    borderRadius: 10,
+    marginBottom: 20,
   },
-  progress: {
-    alignSelf: 'center',
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: 20,
     marginBottom: 20,
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
     textAlign: 'center',
     marginBottom: 10,
   },
   subheading: {
     fontSize: 16,
-    color: '#666',
+    color: '#fff',
     textAlign: 'center',
-    marginBottom: 20,
   },
-  smallText: {
-    fontSize: 12,
-    color: '#888',
+  rankText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
     textAlign: 'center',
     marginBottom: 10,
   },
+  progress: {
+    alignSelf: 'center',
+    marginVertical: 20,
+  },
+  progressText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  statsText: {
+    fontSize: 14,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
   button: {
-    height: 50,
-    width: '100%',
     backgroundColor: '#fff',
     borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    marginTop: 10,
-    marginBottom: 100,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonText: {
-    color: '#059212',
-    fontSize: 14,
+    color: '#006769',
+    fontSize: 16,
     fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  btnContainer: {
-    alignSelf: 'center',
-    width: '90%',
-    paddingBottom: 30,
-    marginVertical: 10,
-    marginHorizontal: 20,
-  },
-  div: {
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#e1e1e1',
-    borderRadius: 15,
-    marginVertical: 10,
-    marginHorizontal: 20,
   },
 });

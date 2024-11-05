@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
@@ -16,7 +16,7 @@ type Props = {
 const reasons = ['Fraud', 'Spam', 'Threat', 'Unknown'];
 
 export default function ReportReasonScreen({ navigation, route }: Props) {
-  const { senderNumber, userId } = route.params;
+  const { senderNumber, userId, messageBody } = route.params;
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
 
   const handleReasonSelect = (reason: string) => {
@@ -33,6 +33,7 @@ export default function ReportReasonScreen({ navigation, route }: Props) {
             reason: selectedReason,
             reportedAt: firestore.FieldValue.serverTimestamp(),
             reportedBy: userId,
+            messageBody: messageBody,
           });
         console.log('Sender number reported successfully');
         navigation.goBack();
@@ -43,8 +44,20 @@ export default function ReportReasonScreen({ navigation, route }: Props) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Select a reason for reporting</Text>
+    <ScrollView style={styles.container}>
+      {/* <Text style={styles.title}>Report Message</Text> */}
+      
+      <View style={styles.messageInfoContainer}>
+        <Text style={styles.label}>Sender:</Text>
+        <Text style={styles.info}>{senderNumber}</Text>
+      </View>
+      
+      <View style={styles.messageInfoContainer}>
+        <Text style={styles.label}>Message:</Text>
+        <Text style={styles.info}>{messageBody}</Text>
+      </View>
+      
+      <Text style={styles.subtitle}>Select a reason for reporting</Text>
       {reasons.map((reason) => (
         <TouchableOpacity
           key={reason}
@@ -64,7 +77,7 @@ export default function ReportReasonScreen({ navigation, route }: Props) {
       >
         <Text style={styles.submitButtonText}>Submit Report</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -75,10 +88,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  messageInfoContainer: {
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  info: {
+    fontSize: 16,
   },
   reasonButton: {
     backgroundColor: '#ffffff',
@@ -101,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+    marginBottom: 100,
   },
   disabledButton: {
     backgroundColor: '#b0bec5',
